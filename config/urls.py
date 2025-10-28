@@ -20,5 +20,5 @@ from apps.productos.views import ir_inicio
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', ir_inicio)
+    path('', ir_inicio, name='inicio')
 ]
