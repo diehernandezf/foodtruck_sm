@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const itemHtml = `
                 <div class="flex gap-4 p-4 bg-surface-light dark:bg-surface-dark rounded-lg" data-item-id="${item.id}">
                     <img src="${item.imagen_url}" alt="${item.nombre}" 
-                         class="w-20 h-20 object-cover rounded-lg">
+                        class="w-20 h-20 object-cover rounded-lg">
                     <div class="flex-1">
                         <h4 class="font-semibold text-sm">${item.nombre}</h4>
                         <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
@@ -261,3 +261,16 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Error:', error));
 });
+
+async function pagar_carrito(){
+    const respuesta = await fetch('/orders/iniciar_pago/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    });
+    const data = await respuesta.json();
+    if data.
+}
