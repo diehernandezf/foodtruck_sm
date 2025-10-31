@@ -263,19 +263,21 @@ function eliminarItem(itemId) {
 }
 
 // Pagar carrito
-function pagar_carrito() {
+async function pagar_carrito() {
     console.log('💳 Iniciando proceso de pago');
     
-    fetch('/orders/iniciar_pago/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-    })
-    .then(response => response.json())
-    .then(data => {
+    try {
+        const respuesta = await fetch('/orders/iniciar_pago/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        });
+        
+        const data = await respuesta.json();
+        
         if (data.success) {
             if (data.url) {
                 window.location.href = data.url;
@@ -285,11 +287,10 @@ function pagar_carrito() {
         } else {
             mostrarNotificacion(data.message || 'Error al procesar el pago', 'error');
         }
-    })
-    .catch(error => {
+    } catch (error) {
         console.error('Error:', error);
         mostrarNotificacion('Error al iniciar el pago', 'error');
-    });
+    }
 }
 
 // ============================================
