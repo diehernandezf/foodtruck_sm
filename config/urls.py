@@ -6,4 +6,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', ir_inicio, name='inicio'),
     path('carrito/', include('apps.productos.urls')),
+    path('pagos/', include('apps.pagos.urls')),
 ]

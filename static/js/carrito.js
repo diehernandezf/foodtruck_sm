@@ -266,7 +266,7 @@ function eliminarItem(itemId) {
 function pagar_carrito() {
     console.log('💳 Iniciando proceso de pago');
     
-    fetch('/orders/iniciar_pago/', {
+    fetch('/pagos/iniciar_pago/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),

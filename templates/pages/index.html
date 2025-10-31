@@ -5,6 +5,8 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
     <title>SanMartin Foodtruck</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&display=swap"
@@ -86,7 +88,7 @@
                     <span>Total:</span>
                     <span id="carrito-total">$0</span>
                 </div>
-                <button
+                <button id="iniciar_pago_js" onclick="pagar_carrito()"
                     class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors">
                     Proceder al Pago
                 </button>
