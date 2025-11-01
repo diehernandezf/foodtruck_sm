@@ -29,27 +29,53 @@ def get_transaction():
 # (esto evita que django valide el token cuando se hace una request desde el token a la vista)
 @csrf_exempt
 def iniciar_pago(request):
-    if request.method == 'POST':
-        carrito = Carrito.objects.filter(usuario=request.user, activo=True).first()
+    try:
+        if request.method == 'POST':
+            # Obtenemos el carrito de la sesión o creamos uno nuevo
+            session_key = request.session.session_key
+            if not session_key:
+                request.session.create()
+                session_key = request.session.session_key
 
-        if not carrito:
-            return JsonResponse({'error': 'No hay un carrito activo'}, status=400)
+            carrito = Carrito.objects.filter(session_key=session_key).first()
 
-        total = carrito.total  # calcular a mano o llamar funcion
+            if not carrito:
+                return JsonResponse({'error': 'No hay un carrito activo'}, status=400)
 
-        buy_order = generar_orden()
-        session_id = str(request.user.id)
-        return_url = request.build_absolute_uri(reverse('retorno_pago'))
+            if not carrito.items.exists():
+                return JsonResponse({'error': 'El carrito está vacío'}, status=400)
 
-        tx = get_transaction()
-        response = tx.create(buy_order, session_id, round(total), return_url)
+            total = carrito.total
+            if total <= 0:
+                return JsonResponse({'error': 'El monto total debe ser mayor a 0'}, status=400)
 
-        carrito.token = response['token']
-        carrito.save()
+            buy_order = generar_orden()
+            return_url = request.build_absolute_uri(reverse('pagos:retorno_pago'))
 
-        return JsonResponse({'url': response['url'], 'token': response['token']})
+            try:
+                tx = get_transaction()
+                response = tx.create(buy_order, session_key, round(total), return_url)
 
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+                carrito.token = response['token']
+                carrito.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'url': response['url'], 
+                    'token': response['token']
+                })
+            except Exception as e:
+                return JsonResponse({
+                    'error': f'Error al procesar el pago: {str(e)}',
+                    'success': False
+                }, status=500)
+
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    except Exception as e:
+        return JsonResponse({
+            'error': f'Error inesperado: {str(e)}',
+            'success': False
+        }, status=500)
 
 @csrf_exempt
 def retorno_pago(request):
