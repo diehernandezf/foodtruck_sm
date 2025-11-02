@@ -10,9 +10,9 @@ function getCookie(name) {
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            const cookie = cookies[i].trim(); //elimina espacios en blanco al inicio y final de cada string
+            if (cookie.substring(0, name.length + 1) === (name + '=')) { // se comprueba si la cookie es la que buscamos
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); //extrae el valor despues del =
                 break;
             }
         }
@@ -20,22 +20,24 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Mostrar notificación
+// Mostrar notificación, mensaje temporal en la pantalla
 function mostrarNotificacion(mensaje, tipo) {
     console.log('📢 Notificación:', mensaje, tipo);
-    const notif = document.createElement('div');
+    const notif = document.createElement('div'); //crea un elemento div aun no visible
     notif.className = `fixed top-4 right-4 z-[100] px-6 py-3 rounded-lg shadow-lg text-white transform transition-transform duration-300 ${
         tipo === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
+    }`;//se le da estilo mediante la clase con tailwind
     notif.textContent = mensaje;
-    document.body.appendChild(notif);
+    document.body.appendChild(notif);// se inserta el elemento en el body
 
-    setTimeout(() => {
-        notif.style.transform = 'translateX(400px)';
-        setTimeout(() => notif.remove(), 300);
-    }, 3000);
+    setTimeout(() => { //se configura la animacion de salida
+        notif.style.transform = 'translateX(400px)'; // se translada hacia la derecha 400px
+        setTimeout(() => notif.remove(), 300);//se elimina despues de tres segundos
+    }, 3000);//espera tres segundos antes de ejecutar la funcion interna
 }
-
+//
+// SEGUIR COMENTANDO
+//
 // Actualizar contador del carrito
 function actualizarContador(total) {
     const carritoCount = document.getElementById('carrito-count');

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <title>SanMartin Foodtruck</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#f27f0d',
+                        'background-light': '#F7F5F2',
+                        'background-dark': '#221910',
+                        'text-light': '#333333',
+                        'text-dark': '#F7F5F2',
+                        'text-secondary-light': '#4A5759',
+                        'text-secondary-dark': '#b0bec5',
+                        'surface-light': '#FFFFFF',
+                        'surface-dark': '#2a2016'
+                    },
+                    fontFamily: {
+                        display: ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body>
+
+    {% include 'pages/navbar.html' %}
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>

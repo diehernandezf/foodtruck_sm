@@ -1,48 +1,6 @@
+{% extends 'pages/layout.html' %}
 {% load humanize %}
-<!DOCTYPE html>
-<html class="light" lang="es">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-    <title>SanMartin Foodtruck</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;700;900&display=swap"
-        rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#f27f0d',
-                        'background-light': '#F7F5F2',
-                        'background-dark': '#221910',
-                        'text-light': '#333333',
-                        'text-dark': '#F7F5F2',
-                        'text-secondary-light': '#4A5759',
-                        'text-secondary-dark': '#b0bec5',
-                        'surface-light': '#FFFFFF',
-                        'surface-dark': '#2a2016'
-                    },
-                    fontFamily: {
-                        display: ["Work Sans", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                },
-            },
-        }
-    </script>
-</head>
-
+{% block content %}
 <body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
 
     <!-- Overlay del carrito -->
@@ -101,27 +59,6 @@
     </div>
 
     <div class="relative flex min-h-screen w-full flex-col">
-        <!-- TopNavBar -->
-        <header
-            class="sticky top-0 z-30 flex items-center justify-center border-b border-black/10 dark:border-white/10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
-            <div class="flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center gap-4">
-                    <span class="material-symbols-outlined text-primary text-3xl">LOGO</span>
-                    <h2 class="text-xl font-bold tracking-tight">SanMartin Foodtruck</h2>
-                </div>
-                <div class="bg-dark">
-                <button id="iniciar_pag_btn" onclick="pagar_carrito()" class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary px-5 text-white transition-transform hover:scale-105">
-                    <p class="text-sm font-bold">Administrar</p>
-                </button>
-                </div>
-                <button id="carrito-btn"
-                    class="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/20 text-text-light dark:text-text-dark transition-colors hover:bg-primary/30">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span id="carrito-count"
-                        class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                </button>
-            </div>
-        </header>
 
         <!-- Main Content -->
         <main class="flex w-full flex-1 flex-col items-center">
@@ -209,5 +146,4 @@
     <!-- Script del carrito -->
     <script src="/static/js/carrito.js?v=2"></script>
 </body>
-
-</html>
+{% endblock %}

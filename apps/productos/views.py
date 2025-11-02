@@ -35,7 +35,7 @@ def ir_inicio(request):
         'categorias': categorias,
         'total_items_carrito': total_items,
     }
-    return render(request, "pages/index.html", context)
+    return render(request, "index.html", context)
 
 
 @require_POST
@@ -174,3 +174,9 @@ def vaciar_carrito(request):
             'success': False,
             'message': str(e)
         }, status=400)
+    
+###
+#CRUD PRODUCTOS
+###
+def ir_crud_productos(request):
+    return render(request, "crud_productos.html")
