@@ -34,7 +34,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',  # Para formatear números ($1.000)
+    'django.contrib.humanize', # Para formatear números ($1.000)
 ]
 
 THIRD_PARTY_APPS = [
