@@ -1,21 +1,33 @@
-{% extends 'pages/layout.html' %}
+{% extends "pages/layout.html" %}
+
+<!-- {% block title %}Log-in{% endblock %} -->
 
 
 <div class="columns">
     {% block content %}
     <div class="column is-half">
         <h1 class="is-size-3 mt-3">Log-in</h1>
-        <p class="is-size-5">Please, use the following form to log-in:</p>
+        {% if form.errors %}
+        <p class="is-size-5">
+            Tu usuario o contraseña no son correctos.
+            Intenta otra vez.
+        </p>
+        {% else %}
+        <p class="is-size-5">Ingrese su datos en el formulario</p>
+        {% endif %}
 
-        <form method="post">
-            {% for field in form %}
-                {{ field.label_tag }} {{ field }}
-            {% endfor %}
-            {% csrf_token %}
-            <input type="submit" value="Log in" class="button is-success mt-2">
-        </form>
+        <div class="login-form">
+            <form action="{% url 'usuarios:login' %}" method="post">
+                {% load widget_tweaks %}
+                {% for field in form %}
+                {{ field.label_tag }}
+                {% render_field field class+="input mt-2" %}
+                {% endfor %}
+                {% csrf_token %}
+                <input type="submit" value="Log-in" class="button mt-2">
+                <input type="hidden" name="next" value="{{ next }}">
+            </form>
+        </div>
     </div>
     {% endblock %}
 </div>
-
-

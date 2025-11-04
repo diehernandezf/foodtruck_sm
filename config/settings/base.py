@@ -35,6 +35,7 @@ DJANGO_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize', # Para formatear números ($1.000)
+    'widget_tweaks',
 ]
 
 THIRD_PARTY_APPS = [
@@ -158,3 +159,8 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',  # Bootstrap usa 'danger' en vez de 'error'
 }
+
+# Agregamos variable para que funcione el { next } del formulario login
+LOGIN_REDIRECT_URL = 'crud_usuarios' # redirije a crud_usuarios si el login se hizo de forma correcta
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
