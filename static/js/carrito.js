@@ -264,11 +264,11 @@ function eliminarItem(itemId) {
     });
 }
 
-// Pagar carrito
+// Pagar  (transbank)
 function pagar_carrito() {
     console.log('💳 Iniciando proceso de pago');
     
-    fetch('/pagos/iniciar_pago/', {
+    fetch('/pagos/iniciar_pago/', { // hace una peticion POST al endpoint /pagos/iniciar_pago/
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
@@ -279,8 +279,19 @@ function pagar_carrito() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            if (data.url) {
-                window.location.href = data.url;
+            if (data.url && data.token) { // si esta la url y el token entonces...
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = data.url; // al hacer POST se ejecuta la url
+                
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'token_ws';
+                tokenInput.value = data.token; // se obtiene el token
+                
+                form.appendChild(tokenInput);
+                document.body.appendChild(form);
+                form.submit(); // se ejecuta el formulario con token incluido
             } else {
                 mostrarNotificacion('Procesando pago...', 'success');
             }

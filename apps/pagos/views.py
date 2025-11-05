@@ -22,7 +22,7 @@ from apps.ordenes.models import Carrito
 def get_transaction():
     commerce_code = getattr(settings, 'TRANSBANK_COMMERCE_CODE', None)
     api_key = getattr(settings, 'TRANSBANK_API_KEY', None)
-    integration = IntegrationType.TEST
+    integration = IntegrationType.TEST # Modo de pruebas
     options = WebpayOptions(commerce_code, api_key, integration)
     return Transaction(options)
 
@@ -49,17 +49,17 @@ def iniciar_pago(request):
             if total <= 0:
                 return JsonResponse({'error': 'El monto total debe ser mayor a 0'}, status=400)
 
-            buy_order = generar_orden()
+            buy_order = generar_orden() # Genera orden unica
             return_url = request.build_absolute_uri(reverse('pagos:retorno_pago'))
 
             try:
                 tx = get_transaction()
-                response = tx.create(buy_order, session_key, round(total), return_url)
+                response = tx.create(buy_order, session_key, round(total), return_url) # crea una transaccion en Webpay
 
                 carrito.token = response['token']
-                carrito.save()
+                carrito.save() # Guarda token en el carrito
 
-                return JsonResponse({
+                return JsonResponse({ # retorna pago exitoso, la url a webpay y el token
                     'success': True,
                     'url': response['url'], 
                     'token': response['token']
@@ -78,21 +78,22 @@ def iniciar_pago(request):
         }, status=500)
 
 @csrf_exempt
-def retorno_pago(request):
+def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
     token = request.POST.get('token_ws')
 
     tx = get_transaction()
-    response = tx.commit(token)
+    response = tx.commit(token) # consulta a transbank el resultado final del pago
 
-    if response['status'] == 'AUTHORIZED':
-        carrito = Carrito.objects.filter(token=token).first()
+    # falta actualizar el registro en sqlite(aprobado o fallido)
+    if response['status'] == 'AUTHORIZED': # confirma que el pago fue exitoso
+        carrito = Carrito.objects.filter(token=token).first() # guarda el carrito asociado al token
         if carrito:
             carrito.pagado = True
             carrito.activo = False
             carrito.save()
-        return render(request, 'pagos/exito.html', {'response': response})
+        return render(request, 'pagos/templates/exito.html', {'response': response})
     else:
-        return render(request, 'pagos/error.html', {'response': response})
+        return render(request, 'pagos/templates/error.html', {'response': response})
 
 def generar_orden():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
