@@ -13,6 +13,7 @@ class Carrito(models.Model):
     session_key = models.CharField(max_length=40, null=True, blank=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
+    token = models.CharField(max_length=200, null=True, blank=True, unique=True)
     
     class Meta:
         verbose_name = 'Carrito'

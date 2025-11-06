@@ -79,7 +79,7 @@ def iniciar_pago(request):
 
 @csrf_exempt
 def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
-    token = request.POST.get('token_ws')
+    token = request.POST.get('token_ws') or request.GET.get('token_ws')
 
     tx = get_transaction()
     response = tx.commit(token) # consulta a transbank el resultado final del pago
@@ -91,9 +91,9 @@ def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
             carrito.pagado = True
             carrito.activo = False
             carrito.save()
-        return render(request, 'pagos/templates/exito.html', {'response': response})
+        return render(request, 'exito.html', {'response': response})
     else:
-        return render(request, 'pagos/templates/error.html', {'response': response})
+        return render(request, 'error.html', {'response': response})
 
 def generar_orden():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))

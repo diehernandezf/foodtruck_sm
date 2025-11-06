@@ -1,0 +1,14 @@
+    <div style="text-align: center; padding: 50px;">
+        <h1>❌ Error en el Pago</h1>
+        <p>Lo sentimos, no se pudo procesar tu pago.</p>
+        
+        {% if response.message %}
+        <div style="margin: 20px 0; padding: 20px; background: #f8d7da; border-radius: 8px; color: #721c24;">
+            <p><strong>Motivo:</strong> {{ response.message }}</p>
+        </div>
+        {% endif %}
+        
+        <a href="/" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">
+            Volver al inicio
+        </a>
+    </div>
