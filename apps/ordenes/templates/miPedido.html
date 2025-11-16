@@ -1,0 +1,119 @@
+{% extends 'pages/layout.html' %}
+{% load humanize %}
+{% block content %}
+
+<body>
+    <main class="min-h-screen flex flex-col">
+        <header class="flex items-center justify-between p-6 text-yellow-500">
+            <h1 class="text-2xl font-bold flex items-center">
+                Mi Pedido
+            </h1>
+            <a href="{% url 'productos:home' %}" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+        </header>
+
+        <section class="flex-1 p-6 overflow-y-auto">
+
+            {% if items %}
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!--grupo de rectangulos del producto-->
+                <div class="lg:col-span-2 space-y-4 bg-black-500">
+                    <!--Rectangulo producto-->
+                    {% for item in items %}
+                    <div class="flex gap-4 bg-[#1A1A1A] rounded-lg p-4 shadow-sm border border-yellow-500">
+                        <!-- Imagen del producto -->
+                        <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                            <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="w-full h-full object-cover"
+                                onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'">
+                        </div>
+                        <!-- Info del producto -->
+                        <div class="flex-1 flex justify-between text-lg font-bold text-yellow-500">
+                            <h3>{{ item.nombre }}</h3>
+                            <p>× {{ item.cantidad }}</p>
+                            <h4>${{ item.total|intcomma }}</h4>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Resuemn del pedido -->
+                <div class="lg:col-span-1">
+
+                    <!-- Card sticky que se queda fijo al hacer scroll -->
+                    <div
+                        class="text-yellow-500 bg-[#1A1A1A] rounded-lg shadow-md border border-yellow-500 p-6 sticky top-6">
+                        <h2 class="text-xl font-bold mb-4 pb-4 border-b border-black/10">
+                            Resumen del Pedido
+                        </h2>
+
+                        <!-- Detalles -->
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
+                                <span>Subtotal:</span>
+                                <span class="font-semibold">${{ subtotal|intcomma }}</span>
+                            </div>
+
+                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
+                                <span>Descuentos:</span>
+                                <span class="font-semibold">$0</span>
+                            </div>
+
+                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
+                                <span>Total de items:</span>
+                                <span class="font-semibold">{{ total_items }}</span>
+                            </div>
+
+                            <!-- Línea separadora -->
+                            <div class="border-t border-white pt-3 mt-3">
+                                <div class="flex justify-between items-center text-2xl font-bold">
+                                    <span>TOTAL:</span>
+                                    <span class="text-yellow-500">${{ total|intcomma }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Botones opcion entrega-->
+                        <div class="flex justify-between text-black py-2">
+                            <span><button class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">Retiro</button></span>
+                            <span><button class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">Delivery</button></span>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="space-y-3 text-black">
+                            <a onclick="pagar_carrito()"
+                                class="w-full bg-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">shopping_cart_checkout</span>
+                                Proceder al Pago
+                            </a>
+
+                            <div class="text-black">
+                                <a href="{% url 'productos:home' %}"
+                                    class=" block w-full text-center bg-white font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+                                    Seguir Comprando
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {% else %}
+            <!-- Carrito vacío -->
+            <div class="text-center py-16">
+                <span class="material-symbols-outlined text-7xl text-gray-400 mb-6">shopping_cart</span>
+                <p class="text-lg text-gray-600">Tu carrito está vacío</p>
+                <p class="text-sm text-gray-500 mt-2">¡Agrega algunos productos deliciosos!</p>
+                <a href="{% url 'productos:home' %}"
+                    class="mt-6 inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90">
+                    Ir a la tienda
+                </a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <script src="/static/js/carrito.js?v=2"></script>
+</body>
+{% endblock %}

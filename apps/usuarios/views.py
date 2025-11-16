@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 
 from .forms import LoginForm
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model # se obtiene el modelo de usuario activo del proyecto
+User = get_user_model()
 # Create your views here.
 
 #def ir_crud_usuarios(request):

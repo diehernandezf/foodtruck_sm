@@ -1,23 +1,23 @@
 {% extends 'pages/layout.html' %}
 {% load humanize %}
 {% block content %}
-<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+
+<body class="bg-background-light font-display text-text-light">
 
     <!-- Overlay del carrito -->
     <div id="carrito-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"></div>
 
     <!-- Panel lateral del carrito -->
     <div id="carrito-panel"
-        class="fixed right-0 top-0 h-full w-full max-w-md bg-background-light dark:bg-background-dark shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        class="fixed right-0 top-0 h-full w-full max-w-md bg-background-light shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
         <div class="flex flex-col h-full">
             <!-- Header del carrito -->
-            <div class="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10">
+            <div class="flex items-center justify-between p-4 border-b border-black/10">
                 <h3 class="text-xl font-bold flex items-center gap-2">
                     <span class="material-symbols-outlined">shopping_cart</span>
                     Tu Carrito
                 </h3>
-                <button id="cerrar-carrito"
-                    class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+                <button id="cerrar-carrito" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
@@ -27,9 +27,8 @@
                 <!-- Carrito vacío -->
                 <div id="carrito-vacio" class="hidden text-center py-12">
                     <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">shopping_cart</span>
-                    <p class="text-lg text-text-secondary-light dark:text-text-secondary-dark">Tu carrito está vacío</p>
-                    <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mt-2">¡Agrega algunos
-                        productos deliciosos!</p>
+                    <p class="text-lg text-text-secondary-light">Tu carrito está vacío</p>
+                    <p class="text-sm text-text-secondary-light mt-2">¡Agrega algunos productos deliciosos!</p>
                 </div>
 
                 <!-- Contenido del carrito -->
@@ -41,28 +40,32 @@
             </div>
 
             <!-- Footer del carrito -->
-            <div id="carrito-footer" class="border-t border-black/10 dark:border-white/10 p-4 space-y-3">
+            <div id="carrito-footer" class="border-t border-black/10 p-4 space-y-3">
                 <div class="flex justify-between items-center text-lg font-bold">
                     <span>Total:</span>
                     <span id="carrito-total">$0</span>
                 </div>
-                <button id ="iniciar_pago_btn" onclick="pagar_carrito()"
-                    class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors">
-                    Proceder al Pago
-                </button>
+                <a id="iniciar_pago_btn" href="{% url 'ordenes:miPedido' %}"
+                    class="w-full bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-400 transition-colors">
+                    Siguiente
+                </a>
                 <button id="vaciar-carrito"
-                    class="w-full bg-gray-200 dark:bg-gray-700 text-text-light dark:text-text-dark font-semibold py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    class="w-full bg-gray-200 text-text-light font-semibold py-2 rounded-lg hover:bg-gray-300 transition-colors">
                     Vaciar Carrito
                 </button>
             </div>
         </div>
     </div>
 
+
+
+    <!--CONTENIDO PAGINA-->
     <div class="relative flex min-h-screen w-full flex-col">
 
         <!-- Main Content -->
         <main class="flex w-full flex-1 flex-col items-center">
             <div class="w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
                 <!-- HeroSection -->
                 <div class="w-full @container">
                     <div class="@[480px]:p-4">
@@ -72,7 +75,8 @@
                                 <h1
                                     class="text-4xl font-black leading-tight tracking-tighter text-white sm:text-5xl md:text-6xl">
                                     Footruck San Martin</h1>
-                                <h2 class="text-base font-normal leading-normal text-white/90 sm:text-lg">Los mejores completos, as, sandwiches y mas.</h2>
+                                <h2 class="text-base font-normal leading-normal text-white/90 sm:text-lg">Los mejores
+                                    completos, as, sandwiches y mas.</h2>
                             </div>
                         </div>
                     </div>
@@ -81,15 +85,22 @@
                 <!-- Category Filters -->
                 <div class="flex justify-center py-8">
                     <div class="flex gap-2 overflow-x-auto p-2 sm:gap-3">
-                        <button
-                            class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary px-5 text-white transition-transform hover:scale-105">
-                            <p class="text-sm font-bold">All</p>
-                        </button>
+                        <a href="{% url 'productos:home' %}"
+                            class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-5 transition-all hover:scale-105
+                            {% if not request.GET.categoria %}bg-yellow-500 text-white{% else %}bg-yellow-500 text-white shadow-sm hover:bg-yellow-600{% endif %}">
+                            <p
+                                class="text-sm {% if not request.GET.categoria %}font-bold{% else %}font-medium{% endif %}">
+                                All</p>
+                        </a>
+
                         {% for categoria in categorias %}
-                        <button
-                            class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-background-light dark:bg-surface-dark px-5 shadow-sm transition-colors hover:bg-primary/20 dark:hover:bg-primary/30">
-                            <p class="text-sm font-medium">{{ categoria.nombre }}</p>
-                        </button>
+                        <a href="?categoria={{ categoria.slug }}"
+                            class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-5 shadow-sm transition-all
+                            {% if request.GET.categoria == categoria.slug %}bg-yellow-500 text-white font-bold hover:bg-yellow-400{% else %}bg-background-yellow-500 text-white hover:bg-yellow-400{% endif %}">
+                            <p
+                                class="text-sm {% if request.GET.categoria == categoria.slug %}font-bold{% else %}font-medium{% endif %}">
+                                {{ categoria.nombre }}</p>
+                        </a>
                         {% endfor %}
                     </div>
                 </div>
@@ -98,27 +109,26 @@
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {% for producto in productos %}
                     <div
-                        class="flex flex-col overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark shadow-md transition-shadow hover:shadow-lg">
+                        class=" bg-[#1A1A1A] flex flex-col overflow-hidden rounded-xl shadow-md transition-shadow hover:shadow-lg">
                         <div class="aspect-h-3 aspect-w-4 w-full bg-cover bg-center h-48"
                             style='background-image: url("{{ producto.imagen_url }}");'></div>
                         <div class="flex flex-1 flex-col p-4">
                             <div class="flex-1">
-                                <p class="text-lg font-bold">{{ producto.nombre }}</p>
-                                <p class="mt-1 text-sm text-text-secondary-light dark:text-text-secondary-dark">{{producto.descripcion }}</p>
+                                <p class="text-lg font-bold text-white">{{ producto.nombre }}</p>
+                                <p class="mt-1 text-sm text-white">{{producto.descripcion }}</p>
                             </div>
                             <div class="mt-4 flex items-center justify-between">
-                                <p class="text-lg font-bold text-text-light dark:text-text-dark">${{producto.precio|intcomma }}</p>
+                                <p class="text-lg font-bold text-white">${{producto.precio|intcomma }}</p>
                                 <button onclick="agregarAlCarrito({{ producto.id }}, '{{ producto.nombre }}')"
-                                    class="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-white transition-colors hover:bg-primary/90">
-                                    Add to Cart
+                                    class="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-[#CA8A04] px-4 text-sm font-bold text-white transition-colors hover:bg-yellow-400">
+                                    Añadir al carrito
                                 </button>
                             </div>
                         </div>
                     </div>
                     {% empty %}
                     <div class="col-span-full text-center py-12">
-                        <p class="text-lg text-text-secondary-light dark:text-text-secondary-dark">No hay productos
-                            disponibles en este momento.</p>
+                        <p class="text-lg text-text-secondary-light">No hay productos disponibles en este momento.</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -126,22 +136,56 @@
         </main>
 
         <!-- Footer -->
-        <footer
-            class="w-full border-t border-black/10 dark:border-white/10 bg-background-light dark:bg-background-dark">
+        <footer class="w-full border-t border-black/10 bg-background-light">
             <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-5 py-10 text-center">
                 <div class="flex flex-wrap items-center justify-center gap-6">
-                    <a class="text-base font-medium text-text-secondary-light dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary"
-                        href="#">Contacto</a>
-                    <a class="text-base font-medium text-text-secondary-light dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary"
-                        href="#">Ubicacion</a>
-                    <a class="text-base font-medium text-text-secondary-light dark:text-text-secondary-dark hover:text-primary dark:hover:text-primary"
-                        href="#">...</a>
+                    <a class="text-base font-medium text-text-secondary-light hover:text-primary" href="#">Contacto</a>
+                    <a class="text-base font-medium text-text-secondary-light hover:text-primary" href="#">Ubicacion</a>
+                    <a class="text-base font-medium text-text-secondary-light hover:text-primary" href="#">...</a>
                 </div>
-                <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">© 2024 SanMartin Foodtruck.
-                    All Rights Reserved.</p>
+                <p class="text-sm text-text-secondary-light">© 2024 SanMartin Foodtruck. All Rights Reserved.</p>
             </div>
         </footer>
     </div>
+
+    <!-- Modal -->
+    <div id="modal" tabindex="-1" aria-hidden="true"
+        class="hidden fixed inset-0 z-50 overflow-y-auto overflow-x-hidden">
+
+        <!-- Fondo oscuro -->
+        <div class="fixed inset-0 bg-black/50"></div>
+        <!-- Contenedor del modal -->
+        <div class="relative flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-md rounded-2xl bg-black shadow-xl">
+
+                <!-- Encabezado -->
+                <div class="flex items-center justify-between border-b px-5 py-4 text-white">
+                    <h3 class="text-lg font-semibold">¡Regístrate!</h3>
+                    <button type="button" onclick="cerrarModal()" aria-label="Cerrar">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <!-- Cuerpo -->
+                <div class="px-5 py-5 space-y-4 text-white">
+                    <form method="post" action="#" class="space-y-3">
+                        {% csrf_token %}
+                        <h2>Regístrate y obtén beneficios como descuentos y más!!</h2>
+                        {% if not request.user.is_authenticated %}
+                        <div class="flex justify-end gap-2 pt-3">
+                            <a href="{% url 'usuarios:login' %}"
+                                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                                Registrarse / Iniciar sesión
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <!-- Script del carrito -->
     <script src="/static/js/carrito.js?v=2"></script>

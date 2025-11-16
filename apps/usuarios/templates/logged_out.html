@@ -1,12 +1,12 @@
 {% extends 'pages/layout.html' %}
 
 {% block content %}
-<div class="column is-three-quarters">
+<div class="column is-three-quarters text-white p-6">
 
     <h1>Logged out</h1>
     <p>
         Haz cerrado sesion exitosamente.
-        Puedes <a href="{% url 'usuarios:login' %}">iniciar sesion otra vez</a>
+        <a href="{% url 'usuarios:login' %}" class="text-yellow-500">Iniciar sesion otra vez aqui</a>
     </p>
 </div>
 {% endblock %}

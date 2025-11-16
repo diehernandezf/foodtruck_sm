@@ -26,17 +26,6 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 
-# Application definition
-DJANGO_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.humanize', # Para formatear números ($1.000)
-    'widget_tweaks',
-]
 
 THIRD_PARTY_APPS = [
     # Agregar después: rest_framework, crispy_forms, etc.
@@ -48,6 +37,17 @@ LOCAL_APPS = [
     'apps.pagos.apps.PagosConfig',
     'apps.dashboard.apps.DashboardConfig',
     'apps.usuarios.apps.UsuariosConfig',
+]
+
+DJANGO_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.humanize', # Para formatear números ($1.000)
+    'widget_tweaks',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -164,3 +164,5 @@ MESSAGE_TAGS = {
 LOGIN_REDIRECT_URL = 'crud_usuarios' # redirije a crud_usuarios si el login se hizo de forma correcta
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
+
+AUTH_USER_MODEL = 'usuarios.UsuarioPersonalizado'

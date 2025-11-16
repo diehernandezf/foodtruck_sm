@@ -20,13 +20,12 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Mostrar notificación, mensaje temporal en la pantalla
 function mostrarNotificacion(mensaje, tipo) {
-    console.log('📢 Notificación:', mensaje, tipo);
-    const notif = document.createElement('div'); //crea un elemento div aun no visible
-    notif.className = `fixed top-4 right-4 z-[100] px-6 py-3 rounded-lg shadow-lg text-white transform transition-transform duration-300 ${
-        tipo === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;//se le da estilo mediante la clase con tailwind
+    console.log('mostrarNotificacion():', mensaje, tipo);
+
+    const notif = document.createElement('div');
+    notif.className = `fixed top-4 right-4 z-[100] px-6 py-3 rounded-lg shadow-lg text-white transform transition-transform duration-300 
+    ${tipo === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
     notif.textContent = mensaje;
     document.body.appendChild(notif);// se inserta el elemento en el body
 
@@ -35,9 +34,7 @@ function mostrarNotificacion(mensaje, tipo) {
         setTimeout(() => notif.remove(), 300);//se elimina despues de tres segundos
     }, 3000);//espera tres segundos antes de ejecutar la funcion interna
 }
-//
-// SEGUIR COMENTANDO
-//
+
 // Actualizar contador del carrito
 function actualizarContador(total) {
     const carritoCount = document.getElementById('carrito-count');
@@ -148,57 +145,67 @@ function renderizarItems(items) {
     });
 }
 
-// FUNCIÓN PRINCIPAL: Agregar al carrito
 function agregarAlCarrito(productoId, nombre, precio) {
-    console.log('✅ agregarAlCarrito() llamado');
-    console.log('   Producto ID:', productoId);
-    console.log('   Nombre:', nombre);
-    console.log('   Precio:', precio);
+    console.log('Se llama agregaAlCarrito()');
+    console.log('Producto ID:', productoId);
+    console.log('Nombre:', nombre);
+    console.log('Precio:', precio); // sale precio 'indefinido'
+    let cantidadProductos = 0;
     
     const csrftoken = getCookie('csrftoken');
-    console.log('🔐 CSRF Token:', csrftoken ? 'Encontrado' : '❌ NO ENCONTRADO');
+    console.log('CSRF Token:', csrftoken ? 'Encontrado' : 'NO ENCONTRADO');
 
     if (!csrftoken) {
-        console.error('❌ CSRF token no encontrado');
+        console.error('CSRF token no encontrado');
         mostrarNotificacion('Error: Token de seguridad no encontrado', 'error');
         return;
     }
 
-    console.log('📤 Enviando petición POST a /carrito/agregar/');
+    console.log('Enviando petición POST a /carrito/agregar/');
 
     fetch('/carrito/agregar/', {
         method: 'POST',
-        headers: {
+        headers: { // por ejemplo tipo de contenido o token
             'Content-Type': 'application/json',
             'X-CSRFToken': csrftoken
         },
-        body: JSON.stringify({
+        body: JSON.stringify({ // el contenido que se va a enviar (generalmente en formato JSON)
             producto_id: productoId,
             cantidad: 1
         })
     })
     .then(response => {
-        console.log('📥 Respuesta recibida:', response.status, response.statusText);
+        console.log('Respuesta recibida:', response.status, response.statusText);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
-    .then(data => {
-        console.log('✅ Data JSON:', data);
+    .then(data => { // aca se ocupan los datos
+        console.log('Data JSON:', data);
         if (data.success) {
+            cantidadProductos = data.total_items
+            if (cantidadProductos === 1) {
+                const modal = document.getElementById('modal');
+                modal.classList.remove('hidden');
+            }
             actualizarContador(data.total_items);
             mostrarNotificacion(data.message || 'Producto agregado al carrito', 'success');
             abrirCarrito();
         } else {
-            console.error('❌ Backend retornó success: false');
+            console.error('Backend retornó success: false');
             mostrarNotificacion(data.message || 'Error al agregar producto', 'error');
         }
     })
     .catch(error => {
-        console.error('❌ Error en fetch:', error);
+        console.error('Error en fetch:', error);
         mostrarNotificacion('Error de conexión: ' + error.message, 'error');
     });
+}
+
+function cerrarModal(){
+    const modal = document.getElementById('modal');
+    modal.classList.add('hidden');
 }
 
 // Cambiar cantidad

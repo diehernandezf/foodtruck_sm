@@ -1,15 +1,58 @@
-    <div style="text-align: center; padding: 50px;">
-        <h1>✅ ¡Pago Exitoso!</h1>
+{% extends 'pages/layout.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4 text-white">
+    <div class="bg-[#1A1A1A] p-8 rounded-2xl max-w-md w-full text-center space-y-6">
+        <h1 class="text-3xl font-bold text-green-400">¡Pago Exitoso!</h1>
         <p>Tu pago ha sido procesado correctamente.</p>
-        
-        <div style="margin: 20px 0; padding: 20px; background: #f0f0f0; border-radius: 8px;">
+
+        <div class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
             <p><strong>Orden de compra:</strong> {{ response.buy_order }}</p>
             <p><strong>Código de autorización:</strong> {{ response.authorization_code }}</p>
             <p><strong>Monto:</strong> ${{ response.amount }}</p>
             <p><strong>Fecha:</strong> {{ response.transaction_date }}</p>
         </div>
-        
-        <a href="/" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+
+        <div class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
+            <h2><strong>Pedido #{{ pedido.id }}</strong></h2>
+            <p><strong>Usuario:</strong> {{ pedido.usuario.username }}</p>
+            <p><strong>Fecha:</strong> {{ pedido.fecha|date:"d/m/Y H:i" }}</p>
+            <p><strong>Código de autorización:</strong> {{ pedido.codigo_autorizacion }}</p>
+            <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+            
+            <h3>Detalle de productos:</h3>
+            <table class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
+                <thead>
+                    <tr class="text-black border border-black">
+                        <th class="p-2">Producto</th>
+                        <th class="p-2">Cantidad</th>
+                        <th class="p-2">Precio</th>
+                        <th class="p-2">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in pedido.detalles.all %}
+                    <tr>
+                        <td class="border border-black p-2">{{ detalle.nombre_producto }}</td>
+                        <td class="border border-black p-2">{{ detalle.cantidad }}</td>
+                        <td class="border border-black p-2">${{ detalle.precio_unitario }}</td>
+                        <td class="border border-black p-2">${{ detalle.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="font-bold">
+                        <td colspan="3" class="border border-black text-right p-2">TOTAL:</td>
+                        <td class="border border-black text-right p-2">${{ pedido.total }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <a href="{% url 'productos:home' %}"
+            style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
             Volver al inicio
         </a>
     </div>
+</div>
+{% endblock %}
