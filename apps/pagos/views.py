@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import string
@@ -32,6 +33,8 @@ def get_transaction():
 def iniciar_pago(request):
     try:
         if request.method == 'POST':
+            data = json.loads(request.body)
+            delivery = data.get('delivery', 0)
             carrito = obtener_carrito(request)
 
             if not carrito:
@@ -39,6 +42,9 @@ def iniciar_pago(request):
 
             if not carrito.items.exists():
                 return JsonResponse({'error': 'El carrito está vacío'}, status=400)
+
+            carrito.delivery = delivery
+            
 
             total = carrito.total
             if total <= 0:

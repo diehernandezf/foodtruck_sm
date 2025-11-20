@@ -1,9 +1,11 @@
 {% extends 'pages/layout.html' %}
 {% load humanize %}
+{% load static %}
 {% block content %}
 
 <body>
     <main class="min-h-screen flex flex-col">
+        <div id="carrito-data" data-subtotal="{{ subtotal|default:0 }}"></div>
         <header class="flex items-center justify-between p-6 text-yellow-500">
             <h1 class="text-2xl font-bold flex items-center">
                 Mi Pedido
@@ -55,7 +57,12 @@
                             </div>
 
                             <div class="flex justify-between text-text-secondary-light text-yellow-600">
-                                <span>Descuentos:</span>
+                                <span>Delivery:</span>
+                                <span class="font-semibold" data-delivery>$0</span>
+                            </div>
+
+                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
+                                <span>Descuentos: {{ usuario }}</span>
                                 <span class="font-semibold">$0</span>
                             </div>
 
@@ -68,16 +75,24 @@
                             <div class="border-t border-white pt-3 mt-3">
                                 <div class="flex justify-between items-center text-2xl font-bold">
                                     <span>TOTAL:</span>
-                                    <span class="text-yellow-500">${{ total|intcomma }}</span>
+                                    <span class="text-yellow-500" data-total>${{ total|intcomma }}</span>
                                 </div>
                             </div>
                         </div>
 
                         <!--Botones opcion entrega-->
                         <div class="flex justify-between text-black py-2">
-                            <span><button class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">Retiro</button></span>
-                            <span><button class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">Delivery</button></span>
-                        </div>
+    <span>
+        <button id="btn-retiro" class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+            Retiro
+        </button>
+    </span>
+    <span>
+        <button id="btn-delivery" class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+            Delivery
+        </button>
+    </span>
+</div>
 
                         <!-- Botones de acción -->
                         <div class="space-y-3 text-black">
@@ -112,8 +127,10 @@
             </div>
             {% endif %}
         </section>
+        
     </main>
 
-    <script src="/static/js/carrito.js?v=2"></script>
+    <script src="{% static 'js/carrito.js' %}?v=7"></script>
+
 </body>
 {% endblock %}

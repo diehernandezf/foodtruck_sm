@@ -4,6 +4,8 @@
 
 console.log('✅ carrito.js cargado');
 
+window.deliverySeleccionado = 0;
+
 // Obtener CSRF token
 function getCookie(name) {
     let cookieValue = null;
@@ -61,7 +63,7 @@ function abrirCarrito() {
     console.log('🛒 Abriendo carrito');
     const carritoPanel = document.getElementById('carrito-panel');
     const carritoOverlay = document.getElementById('carrito-overlay');
-    
+
     if (carritoPanel && carritoOverlay) {
         carritoPanel.classList.remove('translate-x-full');
         carritoOverlay.classList.remove('hidden');
@@ -73,7 +75,7 @@ function abrirCarrito() {
 // Cargar carrito
 function cargarCarrito() {
     console.log('📂 Cargando contenido del carrito...');
-    
+
     fetch('/carrito/ver/')
         .then(response => {
             if (!response.ok) {
@@ -83,11 +85,11 @@ function cargarCarrito() {
         })
         .then(data => {
             console.log('📦 Datos del carrito:', data);
-            
+
             const carritoVacio = document.getElementById('carrito-vacio');
             const carritoContenido = document.getElementById('carrito-contenido');
             const carritoTotal = document.getElementById('carrito-total');
-            
+
             if (data.total_items === 0) {
                 carritoVacio.classList.remove('hidden');
                 carritoContenido.classList.add('hidden');
@@ -109,7 +111,7 @@ function cargarCarrito() {
 function renderizarItems(items) {
     const carritoItems = document.getElementById('carrito-items');
     carritoItems.innerHTML = '';
-    
+
     items.forEach(item => {
         const itemHtml = `
             <div class="flex gap-4 p-4 bg-surface-light dark:bg-surface-dark rounded-lg" data-item-id="${item.id}">
@@ -151,7 +153,7 @@ function agregarAlCarrito(productoId, nombre, precio) {
     console.log('Nombre:', nombre);
     console.log('Precio:', precio); // sale precio 'indefinido'
     let cantidadProductos = 0;
-    
+
     const csrftoken = getCookie('csrftoken');
     console.log('CSRF Token:', csrftoken ? 'Encontrado' : 'NO ENCONTRADO');
 
@@ -174,36 +176,36 @@ function agregarAlCarrito(productoId, nombre, precio) {
             cantidad: 1
         })
     })
-    .then(response => {
-        console.log('Respuesta recibida:', response.status, response.statusText);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => { // aca se ocupan los datos
-        console.log('Data JSON:', data);
-        if (data.success) {
-            cantidadProductos = data.total_items
-            if (cantidadProductos === 1) {
-                const modal = document.getElementById('modal');
-                modal.classList.remove('hidden');
+        .then(response => {
+            console.log('Respuesta recibida:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            actualizarContador(data.total_items);
-            mostrarNotificacion(data.message || 'Producto agregado al carrito', 'success');
-            abrirCarrito();
-        } else {
-            console.error('Backend retornó success: false');
-            mostrarNotificacion(data.message || 'Error al agregar producto', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error en fetch:', error);
-        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
-    });
+            return response.json();
+        })
+        .then(data => { // aca se ocupan los datos
+            console.log('Data JSON:', data);
+            if (data.success) {
+                cantidadProductos = data.total_items
+                if (cantidadProductos === 1) {
+                    const modal = document.getElementById('modal');
+                    modal.classList.remove('hidden');
+                }
+                actualizarContador(data.total_items);
+                mostrarNotificacion(data.message || 'Producto agregado al carrito', 'success');
+                abrirCarrito();
+            } else {
+                console.error('Backend retornó success: false');
+                mostrarNotificacion(data.message || 'Error al agregar producto', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error en fetch:', error);
+            mostrarNotificacion('Error de conexión: ' + error.message, 'error');
+        });
 }
 
-function cerrarModal(){
+function cerrarModal() {
     const modal = document.getElementById('modal');
     modal.classList.add('hidden');
 }
@@ -211,7 +213,7 @@ function cerrarModal(){
 // Cambiar cantidad
 function cambiarCantidad(itemId, nuevaCantidad) {
     console.log('🔄 Cambiar cantidad:', itemId, nuevaCantidad);
-    
+
     if (nuevaCantidad < 1) {
         eliminarItem(itemId);
         return;
@@ -228,24 +230,24 @@ function cambiarCantidad(itemId, nuevaCantidad) {
             cantidad: nuevaCantidad
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            cargarCarrito();
-        } else {
-            mostrarNotificacion(data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        mostrarNotificacion('Error al actualizar cantidad', 'error');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                cargarCarrito();
+            } else {
+                mostrarNotificacion(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al actualizar cantidad', 'error');
+        });
 }
 
 // Eliminar item
 function eliminarItem(itemId) {
     console.log('🗑️ Eliminar item:', itemId);
-    
+
     fetch('/carrito/eliminar/', {
         method: 'POST',
         headers: {
@@ -256,69 +258,71 @@ function eliminarItem(itemId) {
             item_id: itemId
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            cargarCarrito();
-            mostrarNotificacion(data.message, 'success');
-        } else {
-            mostrarNotificacion(data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        mostrarNotificacion('Error al eliminar producto', 'error');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                cargarCarrito();
+                mostrarNotificacion(data.message, 'success');
+            } else {
+                mostrarNotificacion(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al eliminar producto', 'error');
+        });
 }
 
 // Pagar  (transbank)
 function pagar_carrito() {
     console.log('💳 Iniciando proceso de pago');
-    
+
     fetch('/pagos/iniciar_pago/', { // hace una peticion POST al endpoint /pagos/iniciar_pago/
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({
+            delivery: window.deliverySeleccionado || 0
+        })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            if (data.url && data.token) { // si esta la url y el token entonces...
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = data.url; // al hacer POST se ejecuta la url
-                
-                const tokenInput = document.createElement('input');
-                tokenInput.type = 'hidden';
-                tokenInput.name = 'token_ws';
-                tokenInput.value = data.token; // se obtiene el token
-                
-                form.appendChild(tokenInput);
-                document.body.appendChild(form);
-                form.submit(); // se ejecuta el formulario con token incluido
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.url && data.token) { // si esta la url y el token entonces...
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = data.url; // al hacer POST se ejecuta la url
+
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = 'token_ws';
+                    tokenInput.value = data.token; // se obtiene el token
+
+                    form.appendChild(tokenInput);
+                    document.body.appendChild(form);
+                    form.submit(); // se ejecuta el formulario con token incluido
+                } else {
+                    mostrarNotificacion('Procesando pago...', 'success');
+                }
             } else {
-                mostrarNotificacion('Procesando pago...', 'success');
+                mostrarNotificacion(data.message || 'Error al procesar el pago', 'error');
             }
-        } else {
-            mostrarNotificacion(data.message || 'Error al procesar el pago', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        mostrarNotificacion('Error al iniciar el pago', 'error');
-    });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al iniciar el pago', 'error');
+        });
 }
 
 // ============================================
 // EVENT LISTENERS (después de que cargue el DOM)
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ DOM completamente cargado');
-    
+
     const carritoBtn = document.getElementById('carrito-btn');
     const cerrarCarritoBtn = document.getElementById('cerrar-carrito');
     const carritoOverlay = document.getElementById('carrito-overlay');
@@ -338,17 +342,17 @@ document.addEventListener('DOMContentLoaded', function() {
         carritoBtn.addEventListener('click', abrirCarrito);
         console.log('✅ Event listener agregado a carrito-btn');
     }
-    
+
     if (cerrarCarritoBtn) {
         cerrarCarritoBtn.addEventListener('click', cerrarCarrito);
         console.log('✅ Event listener agregado a cerrar-carrito');
     }
-    
+
     if (carritoOverlay) {
         carritoOverlay.addEventListener('click', cerrarCarrito);
         console.log('✅ Event listener agregado a overlay');
     }
-    
+
     if (pagarBtn) {
         pagarBtn.addEventListener('click', pagar_carrito);
         console.log('✅ Event listener agregado a proceder-pago');
@@ -356,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Vaciar carrito
     if (vaciarCarritoBtn) {
-        vaciarCarritoBtn.addEventListener('click', function() {
+        vaciarCarritoBtn.addEventListener('click', function () {
             if (confirm('¿Estás seguro de vaciar el carrito?')) {
                 fetch('/carrito/vaciar/', {
                     method: 'POST',
@@ -365,17 +369,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRFToken': getCookie('csrftoken')
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        cargarCarrito();
-                        mostrarNotificacion(data.message, 'success');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarNotificacion('Error al vaciar carrito', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            cargarCarrito();
+                            mostrarNotificacion(data.message, 'success');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        mostrarNotificacion('Error al vaciar carrito', 'error');
+                    });
             }
         });
         console.log('✅ Event listener agregado a vaciar-carrito');
@@ -392,4 +396,91 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('❌ Error al cargar contador inicial:', error);
         });
+});
+
+// miPedido.html
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('✅ miPedido script iniciado');
+
+    try {
+        // 1. Obtener subtotal desde el data-attribute
+        const carritoData = document.getElementById('carrito-data');
+        if (!carritoData) {
+            console.warn('⚠️ No se encontró #carrito-data');
+            return;
+        }
+
+        const subtotal = parseFloat(carritoData.dataset.subtotal) || 0;
+        console.log('Subtotal desde data-subtotal:', subtotal);
+
+        // 2. Obtener elementos del DOM
+        const deliverySpan = document.querySelector('[data-delivery]');
+        const totalSpan = document.querySelector('[data-total]');
+        const btnRetiro = document.getElementById('btn-retiro');
+        const btnDelivery = document.getElementById('btn-delivery');
+
+        console.log('DeliverySpan:', deliverySpan);
+        console.log('TotalSpan:', totalSpan);
+        console.log('BtnRetiro encontrado:', !!btnRetiro);
+        console.log('BtnDelivery encontrado:', !!btnDelivery);
+
+        if (!deliverySpan || !totalSpan || !btnRetiro || !btnDelivery) {
+            console.warn('⚠️ Faltan elementos necesarios en el DOM');
+            return;
+        }
+
+        // 3. Helper para formatear moneda
+        function formatearMonto(monto) {
+            return '$' + monto.toLocaleString('es-CL');
+        }
+
+        // 4. Función para actualizar UI
+        function actualizarTotal(deliveryValue) {
+            const total = subtotal + deliveryValue;
+
+            deliverySpan.textContent = formatearMonto(deliveryValue);
+            totalSpan.textContent = formatearMonto(total);
+
+            console.log('Nuevo delivery:', deliveryValue);
+            console.log('Nuevo total:', total);
+        }
+
+        let deliverySeleccionado = 0;
+
+        btnRetiro.addEventListener('click', function () {
+            deliverySeleccionado = 0;
+            window.deliverySeleccionado = deliverySeleccionado;
+            actualizarTotal(0);
+        });
+
+        btnDelivery.addEventListener('click', function () {
+            deliverySeleccionado = 2000;
+            window.deliverySeleccionado = deliverySeleccionado;
+            actualizarTotal(2000);
+        });
+
+        // 5. Listeners de los botones
+        btnRetiro.addEventListener('click', function () {
+            console.log('✅ CLICK RETIRO DISPARADO');
+            actualizarTotal(0);
+
+            // estilos de selección
+            btnRetiro.style.backgroundColor = '#fbbf24'; // amarillo
+            btnDelivery.style.backgroundColor = 'white';
+        });
+
+        btnDelivery.addEventListener('click', function () {
+            console.log('✅ CLICK DELIVERY DISPARADO');
+            actualizarTotal(2000);
+
+            btnDelivery.style.backgroundColor = '#fbbf24';
+            btnRetiro.style.backgroundColor = 'white';
+        });
+
+        // 6. Estado inicial (por defecto Retiro)
+        actualizarTotal(0);
+
+    } catch (error) {
+        console.error('❌ Error en miPedido script:', error);
+    }
 });

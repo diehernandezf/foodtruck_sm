@@ -1,7 +1,10 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from apps.ordenes.models import Carrito
+from apps.ordenes.models import Carrito, Pedido
+from apps.usuarios.models import UsuarioPersonalizado
+
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 
@@ -24,7 +27,8 @@ def ir_miPedido(request):
         ],
         'subtotal': str(carrito.subtotal),
         'total': str(carrito.total),
-        'total_items': carrito.total_items
+        'total_items': carrito.total_items,
+        'usuario': str(carrito.usuario),
     }
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -42,3 +46,19 @@ def obtener_o_crear_carrito(request):
         session_key = request.session.session_key
         carrito, created = Carrito.objects.get_or_create(session_key=session_key)
     return carrito
+
+def ir_administrar(request):
+    pedidos = Pedido.objects.filter()
+    usuarios = UsuarioPersonalizado.objects.filter()
+    return render(request, 'administrar.html', {'pedidos':pedidos, 'usuarios':usuarios})
+
+@require_POST
+def completar_pedido(request, id_pedido):
+    try:
+        pedido = Pedido.objects.get(id=id_pedido)
+        pedido.estado = 'completado'
+    except Pedido.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Pedido no encontrado'}, status=404)
+    
+    pedido.save()
+    return JsonResponse({'succes':True})

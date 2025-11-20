@@ -59,22 +59,21 @@
 
 
 
-    <!--CONTENIDO PAGINA-->
+    <!--PRODUCTOS-->
     <div class="relative flex min-h-screen w-full flex-col">
 
-        <!-- Main Content -->
         <main class="flex w-full flex-1 flex-col items-center">
             <div class="w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
 
-                <!-- HeroSection -->
+                <!-- IMG CARRITO FOODTRUCK -->
                 <div class="w-full @container">
                     <div class="@[480px]:p-4">
                         <div class="flex min-h-[400px] flex-col items-center justify-center gap-6 rounded-xl bg-cover bg-center bg-no-repeat p-4 text-center @[480px]:gap-8"
-                            style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://www.truck1.cl/img/xxl/19316/Burger-Van-Black-Airstream-Food-Truck-Food-Trailer-foodtruck-China_19316_1796111224.jpg");'>
+                            style='background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url("https://res.cloudinary.com/dnvcewwiv/image/upload/v1763527998/foodtruck-navidad_qwbmkc.jpg");'>
                             <div class="flex flex-col gap-2">
                                 <h1
                                     class="text-4xl font-black leading-tight tracking-tighter text-white sm:text-5xl md:text-6xl">
-                                    Footruck San Martin</h1>
+                                    Foodtruck San Martin</h1>
                                 <h2 class="text-base font-normal leading-normal text-white/90 sm:text-lg">Los mejores
                                     completos, as, sandwiches y mas.</h2>
                             </div>
@@ -82,12 +81,12 @@
                     </div>
                 </div>
 
-                <!-- Category Filters -->
-                <div class="flex justify-center py-8">
+                <!-- FILTRO POR CATEGORIAS -->
+                <div id="seccion-productos" class="flex justify-center py-8">
                     <div class="flex gap-2 overflow-x-auto p-2 sm:gap-3">
                         <a href="{% url 'productos:home' %}"
-                            class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-5 transition-all hover:scale-105
-                            {% if not request.GET.categoria %}bg-yellow-500 text-white{% else %}bg-yellow-500 text-white shadow-sm hover:bg-yellow-600{% endif %}">
+                            class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-5 shadow-sm transition-all
+                            {% if request.GET.categoria == categoria.slug %}bg-yellow-500 text-white font-bold hover:bg-yellow-400{% else %}bg-background-yellow-500 text-white hover:bg-yellow-400{% endif %}">
                             <p
                                 class="text-sm {% if not request.GET.categoria %}font-bold{% else %}font-medium{% endif %}">
                                 All</p>
@@ -105,9 +104,9 @@
                     </div>
                 </div>
 
-                <!-- Product Grid -->
+                <!-- GRID PRODUCTOS -->
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {% for producto in productos %}
+                    {% for producto in pagina %}
                     <div
                         class=" bg-[#1A1A1A] flex flex-col overflow-hidden rounded-xl shadow-md transition-shadow hover:shadow-lg">
                         <div class="aspect-h-3 aspect-w-4 w-full bg-cover bg-center h-48"
@@ -132,20 +131,111 @@
                     </div>
                     {% endfor %}
                 </div>
+                <!--BOTONES PAGINACION-->
+                <div class="flex justify-center mt-8">
+                    <nav class="flex items-center space-x-2">
+                        <!--BTN ANTERIOR-->
+                        {% if pagina.has_previous %}
+                        <a href="?pagina={{ obj_pag.previous_page_number }}"
+                            class="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-700 transition">
+                            ← Anterior
+                        </a>
+                        {% else %}
+                        <span class="px-3 py-1 bg-gray-700/40 text-gray-400 rounded cursor-not-allowed">
+                            ← Anterior
+                        </span>
+                        {% endif %}
+                        <!--NUM PAGINAS-->>
+                        {% for num in pagina.paginator.page_range %}
+                        {% if pagina.number == num %}
+                        <span class="px-3 py-1 bg-yellow-500 text-black font-bold rounded">
+                            {{ num }}
+                        </span>
+                        {% else %}
+                        <a href="?pagina={{ num }}"
+                            class="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-700 transition">
+                            {{ num }}
+                        </a>
+                        {% endif %}
+                        {% endfor %}
+
+                        <!--BTN SIGUIENTE-->
+                        {% if pagina.has_next %}
+                        <a href="?pagina={{ pagina.next_page_number }}"
+                            class="px-3 py-1 bg-gray-800 text-white rounded hover:bg-gray-700 transition">
+                            Siguiente →
+                        </a>
+                        {% else %}
+                        <span class="px-3 py-1 bg-gray-700/40 text-gray-400 rounded cursor-not-allowed">
+                            Siguiente →
+                        </span>
+                        {% endif %}
+
+                    </nav>
+                </div>
+
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="w-full border-t border-black/10 bg-background-light">
-            <div class="mx-auto flex max-w-6xl flex-col items-center gap-6 px-5 py-10 text-center">
-                <div class="flex flex-wrap items-center justify-center gap-6">
-                    <a class="text-base font-medium text-text-secondary-light hover:text-primary" href="#">Contacto</a>
-                    <a class="text-base font-medium text-text-secondary-light hover:text-primary" href="#">Ubicacion</a>
-                    <a class="text-base font-medium text-text-secondary-light hover:text-primary" href="#">...</a>
-                </div>
-                <p class="text-sm text-text-secondary-light">© 2024 SanMartin Foodtruck. All Rights Reserved.</p>
+        <footer class="bg-red-800 text-white py-16 px-4">
+    <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          
+          <!-- Izquierda - Ubicación -->
+          <div class="flex flex-col justify-start">
+            <h3 class="text-xl font-bold mb-4">📍 Ubicación</h3>
+            <p class="text-sm leading-relaxed text-gray-100">
+              Avenida Gabriela Oriente 01216<br>
+              Puente Alto, Chile<br>
+            </p>
+          </div>
+
+          <!-- Centro - Logo e Iconos -->
+          <div class="flex flex-col items-center justify-start">
+            <img 
+              src="https://pedidosya.dhmedia.io/image/pedidosya/restaurants/san-martin.png?quality=70&width=100" 
+              alt="Foodtruck San Martin" 
+              class="mb-8 h-16 rounded-full"
+            >
+            <div class="flex gap-6">
+              <a 
+                href="https://wa.me/56982905859?text=Hola%20quiero%20hacer%20un%20pedido" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="bg-white rounded-full p-3 hover:scale-110 transition-transform"
+                title="WhatsApp"
+              >
+                <i class="fab fa-whatsapp text-red-800 text-2xl"></i>
+              </a>
+              <a 
+                href="#" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="bg-white rounded-full p-3 hover:scale-110 transition-transform"
+                title="Instagram"
+              >
+                <i class="fab fa-instagram text-red-800 text-2xl"></i>
+              </a>
             </div>
-        </footer>
+          </div>
+
+          <!-- Derecha - Pedidos por WhatsApp -->
+          <div class="flex flex-col justify-start md:text-right">
+            <h3 class="text-xl font-bold mb-4">📱 Haz tu Pedido</h3>
+            <p class="text-sm leading-relaxed text-gray-100">
+              ¿Prefieres hacer tu pedido por WhatsApp?<br>
+              <br>
+              Envíanos un mensaje directo con tu solicitud y nos pondremos en contacto de inmediato.<br>
+              <br>
+              ¡Estamos disponibles para atenderte!
+              <br>
+              +56 9 8290 5859
+            </p>
+          </div>
+        </div>
+    </div>
+</footer>
     </div>
 
     <!-- Modal -->

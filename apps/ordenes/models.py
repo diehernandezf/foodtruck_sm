@@ -19,6 +19,8 @@ class Carrito(models.Model):
     token = models.CharField(max_length=200, null=True, blank=True, unique=True)
     pagado = models.BooleanField(default=False)
     activo = models.BooleanField(default=True)
+    delivery = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tipo_entrega = models.CharField(max_length=40, null=True, blank=True)
     
     class Meta:
         verbose_name = 'Carrito'
@@ -53,7 +55,7 @@ class Carrito(models.Model):
     
     @property
     def total(self):
-        return self.subtotal
+        return self.subtotal + self.delivery
 
 
 class ItemCarrito(models.Model):

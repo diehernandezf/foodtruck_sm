@@ -4,6 +4,7 @@ from django.views.decorators.http import require_POST
 from apps.productos.models import Producto, Categoria
 from apps.ordenes.models import Carrito, ItemCarrito
 import json
+from django.core.paginator import Paginator
 
 # Create your views here.
 def obtener_o_crear_carrito(request):
@@ -19,13 +20,16 @@ def obtener_o_crear_carrito(request):
 
 
 def ir_inicio(request):
-    """Vista principal con productos"""
     productos = Producto.objects.filter(disponible=True)
     categorias = Categoria.objects.filter(activo=True)
     
     categoria_slug = request.GET.get('categoria')
     if categoria_slug:
         productos = productos.filter(categoria__slug=categoria_slug)
+
+    paginador = Paginator(productos, 12)
+    pagina_actual = request.GET.get('pagina')
+    pagina = paginador.get_page(pagina_actual)
     
     carrito = obtener_o_crear_carrito(request)
     total_items = carrito.total_items
@@ -34,6 +38,7 @@ def ir_inicio(request):
         'productos': productos,
         'categorias': categorias,
         'total_items_carrito': total_items,
+        'pagina':pagina,
     }
     return render(request, "index.html", context)
 

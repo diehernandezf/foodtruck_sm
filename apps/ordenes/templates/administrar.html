@@ -1,0 +1,56 @@
+{% extends 'pages/layout.html' %}
+{% load static %}
+{% block content %}
+<div class="overflow-x-auto rounded-xl border border-white/5 bg-gray-950/40 backdrop-blur-sm p-5">
+    <table class="min-w-full text-sm">
+        <thead class="bg-gray-900/80 border-b border-white/20">
+            <tr class="text-left text-white">
+                <th class="px-4 py-3 font-semibold">N° Pedido</th>
+                <th class="px-4 py-3 font-semibold">Cliente</th>
+                <th class="px-4 py-3 font-semibold">Tipo entrega</th>
+                <th class="px-4 py-3 font-semibold">Total</th>
+                <th class="px-4 py-3 font-semibold">Estado</th>
+                <th class="px-4 py-3 font-semibold text-red-400">Avisar!</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/10 text-white">
+            {% for pedido in pedidos %}
+            <tr>
+                <td class="px-4 py-3">
+                    {{ pedido.id }}
+                </td>
+                <td class="px-4 py-3">
+                    {{ pedido.usuario }}
+                </td>
+                <td class="px-4 py-3">
+                    Tipo entrega
+                </td>
+                <td class="px-4 py-3">
+                    ${{ pedido.total }}
+                </td>
+                <td class="px-4 py-3">
+                    <span class="estado-texto">{{ pedido.estado }}</span>
+
+                    {% if pedido.estado == 'pagado' %}
+                    <button
+                        data-url="{% url 'ordenes:completar_pedido' pedido.id %}"
+                        class="btn-completado inline-flex items-center justify-center gap-2 px-4 rounded-xl bg-green-700 font-semibold hover:bg-green-500 text-sm md:text-base">
+                        Listo
+                    </button>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3">
+                {% if pedido.usuario.telefono %}
+                +{{ pedido.usuario.telefono }}
+            {% else %}
+                <span class="text-xs text-gray-400">Sin número</span>
+            {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="{% static 'js/administrar.js' %}?v=3"></script>
+{% endblock %}

@@ -1,58 +1,146 @@
 {% extends 'pages/layout.html' %}
-
-{% block content %}
-<div class="min-h-screen flex items-center justify-center p-4 text-white">
-    <div class="bg-[#1A1A1A] p-8 rounded-2xl max-w-md w-full text-center space-y-6">
-        <h1 class="text-3xl font-bold text-green-400">¡Pago Exitoso!</h1>
-        <p>Tu pago ha sido procesado correctamente.</p>
-
-        <div class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
+<!-- <div class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
             <p><strong>Orden de compra:</strong> {{ response.buy_order }}</p>
             <p><strong>Código de autorización:</strong> {{ response.authorization_code }}</p>
             <p><strong>Monto:</strong> ${{ response.amount }}</p>
             <p><strong>Fecha:</strong> {{ response.transaction_date }}</p>
-        </div>
+        </div> -->
 
-        <div class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
-            <h2><strong>Pedido #{{ pedido.id }}</strong></h2>
-            <p><strong>Usuario:</strong> {{ pedido.usuario.username }}</p>
-            <p><strong>Fecha:</strong> {{ pedido.fecha|date:"d/m/Y H:i" }}</p>
-            <p><strong>Código de autorización:</strong> {{ pedido.codigo_autorizacion }}</p>
-            <p><strong>Estado:</strong> {{ pedido.estado }}</p>
-            
-            <h3>Detalle de productos:</h3>
-            <table class="p-5 rounded-xl text-left space-y-2 bg-white text-black">
-                <thead>
-                    <tr class="text-black border border-black">
-                        <th class="p-2">Producto</th>
-                        <th class="p-2">Cantidad</th>
-                        <th class="p-2">Precio</th>
-                        <th class="p-2">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for detalle in pedido.detalles.all %}
-                    <tr>
-                        <td class="border border-black p-2">{{ detalle.nombre_producto }}</td>
-                        <td class="border border-black p-2">{{ detalle.cantidad }}</td>
-                        <td class="border border-black p-2">${{ detalle.precio_unitario }}</td>
-                        <td class="border border-black p-2">${{ detalle.subtotal }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot>
-                    <tr class="font-bold">
-                        <td colspan="3" class="border border-black text-right p-2">TOTAL:</td>
-                        <td class="border border-black text-right p-2">${{ pedido.total }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
 
-        <a href="{% url 'productos:home' %}"
-            style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
-            Volver al inicio
-        </a>
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-8">
+    <div class="w-full max-w-3xl">
+        <!-- Card principal -->
+        <div class="bg-[#222222] border border-green-500/40 rounded-2xl shadow-2xl p-6 md:p-8 space-y-6">
+            <!-- Encabezado de éxito -->
+            <div class="flex items-start gap-4">
+                <div
+                    class="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 border border-green-400/60">
+                    <span class="material-symbols-outlined text-3xl text-green-400">
+                        check_circle
+                    </span>
+                </div>
+
+                <div class="flex-1">
+                    <h1 class="text-3xl md:text-4xl font-extrabold text-green-400 tracking-tight">
+                        ¡Pago exitoso!
+                    </h1>
+                    <p class="mt-2 text-gray-300">
+                        Tu pago ha sido procesado correctamente.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mensaje de WhatsApp -->
+            <div class="mt-2 rounded-xl bg-emerald-500/10 border border-emerald-400/40 px-4 py-3 flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-400/60">
+                    <span class="material-symbols-outlined text-lg text-emerald-400">
+                        chat
+                    </span>
+                </div>
+                <div>
+                    <p class="text-base text-white">
+                        Te enviaremos un mensaje de confirmación a tu
+                        <span class="font-semibold text-emerald-300">WhatsApp</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Resumen del pedido -->
+            <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                <div class="lg:col-span-2 space-y-2 text-base text-white">
+                    <h2 class="font-semibold uppercase tracking-wide">
+                        Resumen del pedido
+                    </h2>
+                    <p>
+                        <span class="font-semibold">Pedido</span> #{{ pedido.id }}
+                    </p>
+                    <p>
+                        <span class="font-semibold">Cliente:</span> {{ pedido.usuario }}
+                    </p>
+                    <p>
+                        <span class="font-semibold">Fecha:</span> {{ pedido.fecha|date:"d/m/Y H:i" }}
+                    </p>
+                    <div class="mt-2 rounded-xl bg-emerald-500/10 border border-emerald-400/40 px-4 py-3 flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-400/60">
+                    <span class="material-symbols-outlined text-lg text-emerald-400">
+                        chat
+                    </span>
+                </div>
+                <div>
+                    <p class="text-base text-white">
+                        Sigue asi y en tu 3er pedido obten 30% de 
+                        <span class="font-semibold text-emerald-300">desuento!!!</span>
+                        Vuelve pronto
+                    </p>
+                </div>
+            </div>
+                </div>
+            </div>
+
+            <!-- Detalle de productos -->
+            <div class="mt-4">
+                <h3 class="text-base font-semibold text-white mb-2 uppercase tracking-wide">
+                    Detalle de productos
+                </h3>
+
+                <div
+                    class="overflow-x-auto rounded-xl border border-white/5 bg-gray-950/40 backdrop-blur-sm">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-900/80 border-b border-white/20">
+                            <tr class="text-left text-white">
+                                <th class="px-4 py-3 font-semibold">Producto</th>
+                                <th class="px-4 py-3 font-semibold text-center">Cantidad</th>
+                                <th class="px-4 py-3 font-semibold text-right">Precio</th>
+                                <th class="px-4 py-3 font-semibold text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/10 text-white">
+                            {% for detalle in pedido.detalles.all %}
+                            <tr>
+                                <td class="px-4 py-3">
+                                    {{ detalle.nombre_producto }}
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    {{ detalle.cantidad }}
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    ${{ detalle.precio_unitario }}
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    ${{ detalle.subtotal }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="bg-gray-900/80 border-t border-white/20">
+                            <tr>
+                                <td colspan="3" class="px-4 py-3 text-right font-semibold text-white">
+                                    TOTAL
+                                </td>
+                                <td class="px-4 py-3 text-right font-bold text-white">
+                                    ${{ pedido.total }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Botón de volver -->
+            <div class="pt-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <a href="{% url 'productos:home' %}"
+                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-yellow-500 text-black font-semibold 
+                        hover:bg-yellow-400 transition transform text-sm md:text-base">
+                    Volver al inicio
+                </a>
+
+                <p class="text-xs text-white text-center sm:text-right">
+                    Si tienes algún problema con tu pedido, contáctanos al
+                    <span class="font-bold">+569 XXXX XXXX</span>.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,44 +1,62 @@
-<header
-    class="sticky top-0 z-30 flex items-center justify-center border-b border-black/10 dark:border-white/10 bg-black dark:bg-background-dark/80 backdrop-blur-sm">
-    <div class="flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-4">
+<header class="top-0 z-30 bg-black">
+    <div class="flex h-20 w-full max-w-7xl mx-auto items-center px-10">
+
+        <!-- LEFT: Logo + menú -->
+        <div class="flex items-center gap-5 flex-shrink-0">
             <a href="{% url 'productos:home' %}">
-                <img src="https://pedidosya.dhmedia.io/image/pedidosya/restaurants/san-martin.png?quality=70&width=100" 
-       alt="San Martin Foodtruck" 
-       class="w-11 h-11 object-contain">
-    </a>
-        </div>
-
-        {% if request.user.is_authenticated and request.user.is_superuser %}
-        <div class="bg-dark">
-            <button id="iniciar_pag_btn" onclick="pagar_carrito()"
-                class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-yellow-500 px-5 text-black transition-transform hover:scale-105">
-                <p class="text-sm font-bold">Administrar</p>
-            </button>
-        </div>
-        {% endif %}
-        {% if request.user.is_authenticated %}
-        <div>
-            <p class="text-yellow-500">Hola {{ request.user.first_name|default:request.user.username }}</p>
-            <a href="{% url 'usuarios:logout' %}" class="font-bold text-yellow-500">
-                <p>Log out</p>
+                <img src="https://pedidosya.dhmedia.io/image/pedidosya/restaurants/san-martin.png?quality=70&width=100"
+                    alt="San Martin Foodtruck"
+                    class="w-16 h-16 rounded-full">
             </a>
-        </div>
-        
-        {% else %}
 
-            <a type="submit" href="{% url 'usuarios:login' %}"
-                class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-yellow-500 px-5 text-black transition-transform hover:scale-105">
-                Iniciar ssesion
+            <nav class="flex items-center gap-2 text-white uppercase text-sm tracking-wide">
+                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-productos">Haz tu pedido</a>
+                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-productos">Menú</a>
+                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-footer">Ubicación</a>
+                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-footer">Contacto</a>
+            </nav>
+        </div>
+
+        <!-- PUSH RIGHT -->
+        <div class="flex-1"></div>
+
+        <!-- RIGHT -->
+        <div class="flex items-center gap-6">
+
+            {% if request.user.is_authenticated and request.user.is_superuser %}
+            <a href="{% url 'ordenes:administrar' %}" class="h-10 px-4 flex items-center justify-center rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">
+                Administrar
             </a>
             {% endif %}
-        
 
-        <button id="carrito-btn"
-            class="relative flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-yellow-500 text-black dark:text-text-dark transition-colors hover:bg-yellow-400">
-            <span class="material-symbols-outlined">shopping_cart</span>
-            <span id="carrito-count"
-                class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
-        </button>
+            {% if request.user.is_authenticated %}
+            <div class="text-right text-sm leading-tight">
+                <p class="text-yellow-500">
+                    Hola {{ request.user.first_name|default:request.user.username }}
+                </p>
+                <a href="{% url 'usuarios:logout' %}"
+                class="font-bold text-yellow-500 hover:text-yellow-400">
+                    Log out
+                </a>
+            </div>
+            {% else %}
+            <a href="{% url 'usuarios:login' %}"
+            class="h-10 px-4 flex items-center justify-center rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">
+                Iniciar sesión
+            </a>
+            {% endif %}
+
+            <!-- CARRITO -->
+            <button id="carrito-btn"
+                class="relative flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500 text-black hover:bg-yellow-400 transition ml-4">
+                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                <span id="carrito-count"
+                    class="hidden absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                    0
+                </span>
+            </button>
+
+        </div>
+
     </div>
 </header>
