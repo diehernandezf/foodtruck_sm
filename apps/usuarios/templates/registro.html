@@ -1,7 +1,67 @@
-{% extends 'pages/layout.html' %}
+{% extends "pages/layout.html" %}
 
 {% block content %}
+<div class="min-h-screen flex items-center justify-center bg-[#222222] px-4 py-8">
+    <div class="w-full max-w-md">
 
-<div>REGISTRO</div>
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
 
+            <h1 class="text-3xl font-extrabold text-center text-gray-900 mb-2">Crear cuenta</h1>
+
+            {% if form.errors %}
+                <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-6">
+                    Hay errores en el formulario. Revisa los campos.
+                </div>
+            {% endif %}
+
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-gray-800">
+                        {{ field.label }}
+                    </label>
+
+                    {# Campo especial para TELÉFONO con +56 a la izquierda #}
+                    {% if field.name == "telefono" %}
+                        <div class="flex items-stretch gap-2">
+                            <div class="px-3 py-2 rounded-lg border text-sm bg-gray-100 border-gray-300 text-gray-800 flex items-center">
+                                +56
+                            </div>
+                            {{ field }}
+                        </div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <p class="text-gray-500 text-xs mt-1">{{ field.help_text|safe }}</p>
+                    {% endif %}
+
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-xs mt-1">• {{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                <button type="submit"
+                    class="w-full py-2.5 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold text-sm shadow-md transition">
+                    Crear cuenta
+                </button>
+            </form>
+
+            <div class="text-center mt-6 text-gray-500 text-sm">
+                ¿Ya tienes una cuenta?
+            </div>
+
+            <a href="{% url 'usuarios:login' %}"
+                class="mt-2 block text-center w-full py-2.5 rounded-lg border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition">
+                Iniciar sesión
+            </a>
+
+        </div>
+
+    </div>
+</div>
 {% endblock %}

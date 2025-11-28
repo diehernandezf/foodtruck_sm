@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 
 from django.conf import settings
@@ -7,6 +8,12 @@ from django.db.models import Q
 
 
 class Carrito(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('cancelado', 'Cancelado'),
+        ('completado', 'Completado'),
+    ]
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
@@ -18,9 +25,11 @@ class Carrito(models.Model):
     actualizado = models.DateTimeField(auto_now=True)
     token = models.CharField(max_length=200, null=True, blank=True, unique=True)
     pagado = models.BooleanField(default=False)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     activo = models.BooleanField(default=True)
     delivery = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    tipo_entrega = models.CharField(max_length=40, null=True, blank=True)
+    tipo_entrega = models.CharField(max_length=40, null=True, blank=True, choices=[('retiro', 'Retiro'), ('delivery', 'Delivery')], default='retiro')
+    direccion = models.CharField(max_length=100, null=True, blank=True)
     
     class Meta:
         verbose_name = 'Carrito'
@@ -51,11 +60,19 @@ class Carrito(models.Model):
     
     @property
     def subtotal(self):
-        return sum(item.total for item in self.items.all()) # entender de donde viene el self.items
+        return sum(item.total for item in self.items.all())# entender de donde viene el self.items
+    
+    @property
+    def descuento(self):
+        total_pedidos = getattr(self.usuario, 'total_pedidos', 0) if self.usuario else 0
+        if total_pedidos == 0:
+            return self.subtotal * Decimal('0.30')
+        return Decimal('0')
     
     @property
     def total(self):
-        return self.subtotal + self.delivery
+        delivery = self.delivery or Decimal('0')
+        return (self.subtotal - self.descuento) + delivery
 
 
 class ItemCarrito(models.Model):
@@ -108,6 +125,9 @@ class Pedido(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     fecha = models.DateTimeField(auto_now_add=True)
+    delivery = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tipo_entrega = models.CharField(max_length=40, null=True, blank=True)
+    direccion = models.CharField(max_length=100, null=True, blank=True)
 
     codigo_autorizacion = models.CharField(max_length=100, blank=True, null=True)
     orden_compra = models.CharField(max_length=100, blank=True, null=True)

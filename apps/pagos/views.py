@@ -21,7 +21,8 @@ from django.contrib.auth import get_user_model
     # """
     
     # Map environment string to IntegrationType if desired; default to TEST for development
-def get_transaction():
+
+def get_transaction(): # Crea el cliente de Transbank
     commerce_code = getattr(settings, 'TRANSBANK_COMMERCE_CODE', None)
     api_key = getattr(settings, 'TRANSBANK_API_KEY', None)
     integration = IntegrationType.TEST # Modo de pruebas
@@ -34,7 +35,7 @@ def iniciar_pago(request):
     try:
         if request.method == 'POST':
             data = json.loads(request.body)
-            delivery = data.get('delivery', 0)
+            direccion = data.get('direccion', '')
             carrito = obtener_carrito(request)
 
             if not carrito:
@@ -43,9 +44,10 @@ def iniciar_pago(request):
             if not carrito.items.exists():
                 return JsonResponse({'error': 'El carrito está vacío'}, status=400)
 
-            carrito.delivery = delivery
+            if direccion:
+                carrito.direccion = direccion
+                carrito.save()
             
-
             total = carrito.total
             if total <= 0:
                 return JsonResponse({'error': 'El monto total debe ser mayor a 0'}, status=400)
@@ -81,26 +83,44 @@ def iniciar_pago(request):
 @csrf_exempt
 def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
     token = request.POST.get('token_ws') or request.GET.get('token_ws')
+    tbk_token = request.GET.get('TBK_TOKEN')
+    tbk_orden_compra = request.GET.get('TBK_ORDEN_COMPRA')
+    tbk_id_sesion = request.GET.get('TBK_ID_SESION')
+
+    if tbk_token and not token:
+        context = {
+            'estado': 'anulado',
+            'mensaje': 'El pago fue anulado o no se completó correctamente.',
+            'tbk_orden_compra': tbk_orden_compra,
+            'tbk_id_sesion': tbk_id_sesion,
+        }
+        return render(request, 'error.html', context)
 
     tx = get_transaction()
     response = tx.commit(token) # consulta a transbank el resultado final del pago
 
-    # falta actualizar el registro en sqlite(aprobado o fallido)
+    pedido = None
+
     if response['status'] == 'AUTHORIZED': # confirma que el pago fue exitoso
         carrito = Carrito.objects.filter(token=token).first() # guarda el carrito asociado al token
         if carrito:
-            carrito.pagado = True   
+            usuario = carrito.usuario
+
+            carrito.pagado = True
             carrito.activo = False
             carrito.save()
 
             # Creamos el pedido
             pedido = Pedido.objects.create(
-                usuario = carrito.usuario,
+                usuario = usuario,
                 token = token,
                 total = carrito.total,
                 estado = 'pagado',
                 codigo_autorizacion = response.get('authorization_code', ''),
-                orden_compra = response.get('buy_order', '')
+                orden_compra = response.get('buy_order', ''),
+                delivery = carrito.delivery,
+                tipo_entrega = carrito.tipo_entrega,
+                direccion = carrito.direccion,
             )
             
             # Creamos detalle del pedido (copiamos items del carrito)
@@ -114,7 +134,7 @@ def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
                     subtotal = item.cantidad * item.producto.precio
                 )
 
-        return render(request, 'exito.html', {'response': response, 'pedido':pedido})
+        return render(request, 'exito.html', {'response': response, 'pedido':pedido, 'carrito':carrito})
     else:
         return render(request, 'error.html', {'response': response})
 

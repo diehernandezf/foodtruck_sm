@@ -39,11 +39,11 @@
                 </div>
             </div>
 
-            <!-- Footer del carrito -->
+            <!-- Footer carrito -->
             <div id="carrito-footer" class="border-t border-black/10 p-4 space-y-3">
                 <div class="flex justify-between items-center text-lg font-bold">
                     <span>Total:</span>
-                    <span id="carrito-total">$0</span>
+                    <span id="carrito-total">${{ subtotal }}</span>
                 </div>
                 <a id="iniciar_pago_btn" href="{% url 'ordenes:miPedido' %}"
                     class="w-full bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-400 transition-colors">
@@ -118,7 +118,7 @@
                             </div>
                             <div class="mt-4 flex items-center justify-between">
                                 <p class="text-lg font-bold text-white">${{producto.precio|intcomma }}</p>
-                                <button onclick="agregarAlCarrito({{ producto.id }}, '{{ producto.nombre }}')"
+                                <button onclick="agregarAlCarrito({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio }})"
                                     class="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-[#CA8A04] px-4 text-sm font-bold text-white transition-colors hover:bg-yellow-400">
                                     Añadir al carrito
                                 </button>
@@ -179,105 +179,87 @@
 
         <!-- Footer -->
         <footer class="bg-red-800 text-white py-16 px-4">
-    <div class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-          
-          <!-- Izquierda - Ubicación -->
-          <div class="flex flex-col justify-start">
-            <h3 class="text-xl font-bold mb-4">📍 Ubicación</h3>
-            <p class="text-sm leading-relaxed text-gray-100">
-              Avenida Gabriela Oriente 01216<br>
-              Puente Alto, Chile<br>
-            </p>
-          </div>
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
 
-          <!-- Centro - Logo e Iconos -->
-          <div class="flex flex-col items-center justify-start">
-            <img 
-              src="https://pedidosya.dhmedia.io/image/pedidosya/restaurants/san-martin.png?quality=70&width=100" 
-              alt="Foodtruck San Martin" 
-              class="mb-8 h-16 rounded-full"
-            >
-            <div class="flex gap-6">
-              <a 
-                href="https://wa.me/56982905859?text=Hola%20quiero%20hacer%20un%20pedido" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                class="bg-white rounded-full p-3 hover:scale-110 transition-transform"
-                title="WhatsApp"
-              >
-                <i class="fab fa-whatsapp text-red-800 text-2xl"></i>
-              </a>
-              <a 
-                href="#" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                class="bg-white rounded-full p-3 hover:scale-110 transition-transform"
-                title="Instagram"
-              >
-                <i class="fab fa-instagram text-red-800 text-2xl"></i>
-              </a>
-            </div>
-          </div>
+                    <!-- Izquierda - Ubicación -->
+                    <div class="flex flex-col justify-start">
+                        <h3 class="text-xl font-bold mb-4">📍 Ubicación</h3>
+                        <p class="text-sm leading-relaxed text-gray-100">
+                            Avenida Gabriela Oriente 01216<br>
+                            Puente Alto, Chile<br>
+                        </p>
+                    </div>
 
-          <!-- Derecha - Pedidos por WhatsApp -->
-          <div class="flex flex-col justify-start md:text-right">
-            <h3 class="text-xl font-bold mb-4">📱 Haz tu Pedido</h3>
-            <p class="text-sm leading-relaxed text-gray-100">
-              ¿Prefieres hacer tu pedido por WhatsApp?<br>
-              <br>
-              Envíanos un mensaje directo con tu solicitud y nos pondremos en contacto de inmediato.<br>
-              <br>
-              ¡Estamos disponibles para atenderte!
-              <br>
-              +56 9 8290 5859
-            </p>
-          </div>
-        </div>
-    </div>
-</footer>
-    </div>
-
-    <!-- Modal -->
-    <div id="modal" tabindex="-1" aria-hidden="true"
-        class="hidden fixed inset-0 z-50 overflow-y-auto overflow-x-hidden">
-
-        <!-- Fondo oscuro -->
-        <div class="fixed inset-0 bg-black/50"></div>
-        <!-- Contenedor del modal -->
-        <div class="relative flex min-h-full items-center justify-center p-4">
-            <div class="relative w-full max-w-md rounded-2xl bg-black shadow-xl">
-
-                <!-- Encabezado -->
-                <div class="flex items-center justify-between border-b px-5 py-4 text-white">
-                    <h3 class="text-lg font-semibold">¡Regístrate!</h3>
-                    <button type="button" onclick="cerrarModal()" aria-label="Cerrar">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-
-                <!-- Cuerpo -->
-                <div class="px-5 py-5 space-y-4 text-white">
-                    <form method="post" action="#" class="space-y-3">
-                        {% csrf_token %}
-                        <h2>Regístrate y obtén beneficios como descuentos y más!!</h2>
-                        {% if not request.user.is_authenticated %}
-                        <div class="flex justify-end gap-2 pt-3">
-                            <a href="{% url 'usuarios:login' %}"
-                                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-                                Registrarse / Iniciar sesión
+                    <!-- Centro - Logo e Iconos -->
+                    <div class="flex flex-col items-center justify-start">
+                        <img src="https://pedidosya.dhmedia.io/image/pedidosya/restaurants/san-martin.png?quality=70&width=100"
+                            alt="Foodtruck San Martin" class="mb-8 h-16 rounded-full">
+                        <div class="flex gap-6">
+                            <a href="https://wa.me/56982905859?text=Hola%20quiero%20hacer%20un%20pedido" target="_blank"
+                                rel="noopener noreferrer"
+                                class="bg-white rounded-full p-3 hover:scale-110 transition-transform" title="WhatsApp">
+                                <i class="fab fa-whatsapp text-red-800 text-2xl"></i>
+                            </a>
+                            <a href="#" target="_blank" rel="noopener noreferrer"
+                                class="bg-white rounded-full p-3 hover:scale-110 transition-transform"
+                                title="Instagram">
+                                <i class="fab fa-instagram text-red-800 text-2xl"></i>
                             </a>
                         </div>
-                        {% endif %}
-                    </form>
-                </div>
+                    </div>
 
+                    <!-- Derecha - Pedidos por WhatsApp -->
+                    <div class="flex flex-col justify-start md:text-right">
+                        <h3 class="text-xl font-bold mb-4">📱 Haz tu Pedido</h3>
+                        <p class="text-sm leading-relaxed text-gray-100">
+                            ¿Prefieres hacer tu pedido por WhatsApp?<br>
+                            <br>
+                            Envíanos un mensaje directo con tu solicitud y nos pondremos en contacto de inmediato.<br>
+                            <br>
+                            ¡Estamos disponibles para atenderte!
+                            <br>
+                            +56 9 8290 5859
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black/50 flex items-center justify-center px-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative
+                transform transition-all duration-200 scale-95 opacity-0 modal-content" role="dialog"
+            aria-modal="true">
+            <button onclick="cerrarModal()"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl leading-none">
+                &times;
+            </button>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">
+                Inicia sesión para tu descuento
+            </h2>
+            <p class="text-gray-600 mb-4">
+                Inicia sesión para realizar tu pedido y obtén un
+                <span class="font-semibold text-yellow-500">30% de descuento</span>
+                en tu primera compra.
+            </p>
+
+            <div class="flex gap-3">
+                <a href="{% url 'usuarios:login' %}"
+                    class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 rounded-lg text-center">
+                    Iniciar sesión
+                </a>
+                <a href="{% url 'usuarios:registro' %}"
+                    class="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg text-center">
+                    Crear cuenta
+                </a>
             </div>
         </div>
     </div>
+    <script>
+        const usuarioLogeado = {{ user.is_authenticated|yesno:"true,false" }};
+    </script>
 
-
-    <!-- Script del carrito -->
-    <script src="/static/js/carrito.js?v=2"></script>
+    <script src="/static/js/carrito.js?v=16"></script>
 </body>
 {% endblock %}

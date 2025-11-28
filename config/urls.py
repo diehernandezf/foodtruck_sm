@@ -6,5 +6,6 @@ urlpatterns = [
     path('', include('apps.productos.urls')),
     path('pagos/', include('apps.pagos.urls')),
     path('usuarios/', include('apps.usuarios.urls')),
-    path('ordenes', include('apps.ordenes.urls'))
+    path('ordenes/', include('apps.ordenes.urls')),
+    path('dashboard/', include('apps.dashboard.urls')),
 ]

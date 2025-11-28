@@ -1,7 +1,3 @@
-// ============================================
-// FUNCIONES GLOBALES (disponibles inmediatamente)
-// ============================================
-
 console.log('✅ carrito.js cargado');
 
 window.deliverySeleccionado = 0;
@@ -37,12 +33,12 @@ function mostrarNotificacion(mensaje, tipo) {
     }, 3000);//espera tres segundos antes de ejecutar la funcion interna
 }
 
-// Actualizar contador del carrito
-function actualizarContador(total) {
+// Actualizar contador de productos del icono del carrito del navbar
+function actualizarContador(total_productos) {
     const carritoCount = document.getElementById('carrito-count');
     if (carritoCount) {
-        carritoCount.textContent = total;
-        if (total > 0) {
+        carritoCount.textContent = total_productos;
+        if (total_productos > 0) {
             carritoCount.classList.remove('hidden');
         } else {
             carritoCount.classList.add('hidden');
@@ -72,9 +68,8 @@ function abrirCarrito() {
     }
 }
 
-// Cargar carrito
 function cargarCarrito() {
-    console.log('📂 Cargando contenido del carrito...');
+    console.log('Cargando contenido del carrito...');
 
     fetch('/carrito/ver/')
         .then(response => {
@@ -84,7 +79,7 @@ function cargarCarrito() {
             return response.json();
         })
         .then(data => {
-            console.log('📦 Datos del carrito:', data);
+            console.log('Datos del carrito:', data);
 
             const carritoVacio = document.getElementById('carrito-vacio');
             const carritoContenido = document.getElementById('carrito-contenido');
@@ -97,9 +92,12 @@ function cargarCarrito() {
                 carritoVacio.classList.add('hidden');
                 carritoContenido.classList.remove('hidden');
                 renderizarItems(data.items);
-                carritoTotal.textContent = `$${formatearPrecio(data.total)}`;
             }
             actualizarContador(data.total_items);
+
+            if (window.actualizarTotal && typeof window.actualizarTotal === 'function') {
+                window.actualizarTotal();
+            }
         })
         .catch(error => {
             console.error('❌ Error al cargar carrito:', error);
@@ -156,10 +154,20 @@ function agregarAlCarrito(productoId, nombre, precio) {
 
     const csrftoken = getCookie('csrftoken');
     console.log('CSRF Token:', csrftoken ? 'Encontrado' : 'NO ENCONTRADO');
-
     if (!csrftoken) {
         console.error('CSRF token no encontrado');
         mostrarNotificacion('Error: Token de seguridad no encontrado', 'error');
+        return;
+    }
+
+    if (!usuarioLogeado) {
+        const modal = document.getElementById('modal');
+        const content = modal.querySelector('.modal-content');
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        })
         return;
     }
 
@@ -187,13 +195,16 @@ function agregarAlCarrito(productoId, nombre, precio) {
             console.log('Data JSON:', data);
             if (data.success) {
                 cantidadProductos = data.total_items
-                if (cantidadProductos === 1) {
-                    const modal = document.getElementById('modal');
-                    modal.classList.remove('hidden');
-                }
                 actualizarContador(data.total_items);
                 mostrarNotificacion(data.message || 'Producto agregado al carrito', 'success');
                 abrirCarrito();
+                if (typeof data.subtotal !== 'undefined') {
+                    actualizarTotalCarrito(data.subtotal);
+                }
+                else {
+                    mostrarNotificacion(data.message, 'error');
+                }
+
             } else {
                 console.error('Backend retornó success: false');
                 mostrarNotificacion(data.message || 'Error al agregar producto', 'error');
@@ -207,13 +218,30 @@ function agregarAlCarrito(productoId, nombre, precio) {
 
 function cerrarModal() {
     const modal = document.getElementById('modal');
-    modal.classList.add('hidden');
+    const content = modal.querySelector('.modal-content');
+    content.classList.add('scale-95', 'opacity-0');
+    content.classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 200);
 }
 
-// Cambiar cantidad
-function cambiarCantidad(itemId, nuevaCantidad) {
-    console.log('🔄 Cambiar cantidad:', itemId, nuevaCantidad);
+function formatCLP(valor) {
+    return '$' + Number(valor).toLocaleString('es-CL', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+}
 
+function actualizarTotalCarrito(subtotal) {
+    const totalSpan = document.getElementById('carrito-total');
+    if (!totalSpan) return;
+    totalSpan.textContent = formatCLP(subtotal);
+}
+
+// Cambiar cantidad del propio producto en el carrito
+function cambiarCantidad(itemId, nuevaCantidad) {
+    console.log('Cambiar cantidadProducto():', itemId, nuevaCantidad);
     if (nuevaCantidad < 1) {
         eliminarItem(itemId);
         return;
@@ -234,8 +262,12 @@ function cambiarCantidad(itemId, nuevaCantidad) {
         .then(data => {
             if (data.success) {
                 cargarCarrito();
-            } else {
-                mostrarNotificacion(data.message, 'error');
+                if (typeof data.subtotal !== 'undefined') {
+                    actualizarTotalCarrito(data.subtotal);
+                }
+                else {
+                    mostrarNotificacion(data.message, 'error');
+                }
             }
         })
         .catch(error => {
@@ -246,7 +278,7 @@ function cambiarCantidad(itemId, nuevaCantidad) {
 
 // Eliminar item
 function eliminarItem(itemId) {
-    console.log('🗑️ Eliminar item:', itemId);
+    console.log('EliminarItem():', itemId);
 
     fetch('/carrito/eliminar/', {
         method: 'POST',
@@ -262,6 +294,12 @@ function eliminarItem(itemId) {
         .then(data => {
             if (data.success) {
                 cargarCarrito();
+                if (typeof data.subtotal !== 'undefined') {
+                    actualizarTotalCarrito(data.subtotal);
+                }
+                else {
+                    mostrarNotificacion(data.message, 'error');
+                }
                 mostrarNotificacion(data.message, 'success');
             } else {
                 mostrarNotificacion(data.message, 'error');
@@ -277,32 +315,49 @@ function eliminarItem(itemId) {
 function pagar_carrito() {
     console.log('💳 Iniciando proceso de pago');
 
-    fetch('/pagos/iniciar_pago/', { // hace una peticion POST al endpoint /pagos/iniciar_pago/
+    // Obtener la dirección si existe
+    const direccionInput = document.getElementById('direccion-input');
+    let direccion = '';
+
+    if (direccionInput) {
+        // Verificar si el contenedor de dirección está visible
+        const direccionContainer = document.getElementById('direccion-container');
+        if (direccionContainer && !direccionContainer.classList.contains('hidden')) {
+            direccion = direccionInput.value.trim();
+
+            if (!direccion) {
+                mostrarNotificacion('Por favor ingresa una dirección', 'error');
+                return;
+            }
+        }
+    }
+
+    fetch('/pagos/iniciar_pago/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            delivery: window.deliverySeleccionado || 0
+            direccion: direccion
         })
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                if (data.url && data.token) { // si esta la url y el token entonces...
+                if (data.url && data.token) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = data.url; // al hacer POST se ejecuta la url
+                    form.action = data.url;
 
                     const tokenInput = document.createElement('input');
                     tokenInput.type = 'hidden';
                     tokenInput.name = 'token_ws';
-                    tokenInput.value = data.token; // se obtiene el token
+                    tokenInput.value = data.token;
 
                     form.appendChild(tokenInput);
                     document.body.appendChild(form);
-                    form.submit(); // se ejecuta el formulario con token incluido
+                    form.submit();
                 } else {
                     mostrarNotificacion('Procesando pago...', 'success');
                 }
@@ -373,7 +428,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(data => {
                         if (data.success) {
                             cargarCarrito();
-                            mostrarNotificacion(data.message, 'success');
+                            if (typeof data.subtotal !== 'undefined') {
+                                actualizarTotalCarrito(data.subtotal);
+                            }
+                            else {
+                                mostrarNotificacion(data.message, 'error');
+                            }
                         }
                     })
                     .catch(error => {
@@ -403,82 +463,127 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('✅ miPedido script iniciado');
 
     try {
-        // 1. Obtener subtotal desde el data-attribute
-        const carritoData = document.getElementById('carrito-data');
-        if (!carritoData) {
-            console.warn('⚠️ No se encontró #carrito-data');
-            return;
+        const tipoGuardado = '{{ tipo_entrega }}';
+        const direccionGuardada = '{{ direccion }}' || '';
+
+        function formatCLP(valor) {
+            return '$' + Number(valor).toLocaleString('es-CL', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            });
         }
 
-        const subtotal = parseFloat(carritoData.dataset.subtotal) || 0;
-        console.log('Subtotal desde data-subtotal:', subtotal);
+        function aplicarFormatoInicial(span) {
+            if (!span) return;
+            const texto = span.textContent.trim();
+            if (!texto) return;
 
-        // 2. Obtener elementos del DOM
+            // Deja solo dígitos, punto y signo menos (por si acaso)
+            const numero = Number(texto.replace(/[^0-9.-]/g, ''));
+            if (isNaN(numero)) return;
+
+            span.textContent = formatCLP(numero);
+        }
+
+        // Referencias a los elementos que muestran montos
+        const subtotalSpan = document.querySelector('[data-subtotal]');
         const deliverySpan = document.querySelector('[data-delivery]');
+        const descuentoSpan = document.querySelector('[data-descuento]');
         const totalSpan = document.querySelector('[data-total]');
+
+        aplicarFormatoInicial(subtotalSpan);
+        aplicarFormatoInicial(descuentoSpan);
+        aplicarFormatoInicial(deliverySpan);
+        aplicarFormatoInicial(totalSpan);
+
+
+
         const btnRetiro = document.getElementById('btn-retiro');
         const btnDelivery = document.getElementById('btn-delivery');
+        const direccionContainer = document.getElementById('direccion-container');
+        const direccionInput = document.getElementById('direccion-input');
 
-        console.log('DeliverySpan:', deliverySpan);
-        console.log('TotalSpan:', totalSpan);
-        console.log('BtnRetiro encontrado:', !!btnRetiro);
-        console.log('BtnDelivery encontrado:', !!btnDelivery);
-
-        if (!deliverySpan || !totalSpan || !btnRetiro || !btnDelivery) {
-            console.warn('⚠️ Faltan elementos necesarios en el DOM');
-            return;
+        if (tipoGuardado === 'delivery') {
+            if (btnDelivery) btnDelivery.style.backgroundColor = '#fbbf24';
+            if (btnRetiro) btnRetiro.style.backgroundColor = 'white';
+            if (direccionContainer) direccionContainer.classList.remove('hidden');
+            if (direccionInput && direccionGuardada) {
+                direccionInput.value = direccionGuardada;
+            }
+        } else {
+            if (btnRetiro) btnRetiro.style.backgroundColor = '#fbbf24';
+            if (btnDelivery) btnDelivery.style.backgroundColor = 'white';
+            if (direccionContainer) direccionContainer.classList.add('hidden');
         }
 
-        // 3. Helper para formatear moneda
-        function formatearMonto(monto) {
-            return '$' + monto.toLocaleString('es-CL');
+        function guardarTipoEntrega(tipo, direccion = '') {
+            fetch('/ordenes/actualizar_tipo_entrega/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    tipo_entrega: tipo,
+                    direccion: direccion
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('✅ Tipo de entrega y montos del backend', data);
+
+                        // 🆕 Usamos SIEMPRE formatCLP para mostrar montos
+                        if (subtotalSpan && data.subtotal !== undefined) {
+                            subtotalSpan.textContent = formatCLP(data.subtotal);
+                        }
+
+                        if (descuentoSpan && data.descuento !== undefined) {
+                            const desc = Number(data.descuento);
+                            descuentoSpan.textContent = desc > 0
+                                ? '-' + formatCLP(desc)
+                                : '$0';
+                        }
+
+                        if (deliverySpan && data.delivery !== undefined) {
+                            deliverySpan.textContent = formatCLP(data.delivery);
+                        }
+
+                        if (totalSpan && data.total !== undefined) {
+                            totalSpan.textContent = formatCLP(data.total);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         }
 
-        // 4. Función para actualizar UI
-        function actualizarTotal(deliveryValue) {
-            const total = subtotal + deliveryValue;
-
-            deliverySpan.textContent = formatearMonto(deliveryValue);
-            totalSpan.textContent = formatearMonto(total);
-
-            console.log('Nuevo delivery:', deliveryValue);
-            console.log('Nuevo total:', total);
+        if (btnRetiro) {
+            btnRetiro.addEventListener('click', function () {
+                console.log('CLICK RETIRO');
+                btnRetiro.style.backgroundColor = '#fbbf24';
+                if (btnDelivery) btnDelivery.style.backgroundColor = 'white';
+                if (direccionContainer) direccionContainer.classList.add('hidden');
+                guardarTipoEntrega('retiro', '');
+            });
         }
 
-        let deliverySeleccionado = 0;
+        if (btnDelivery) {
+            btnDelivery.addEventListener('click', function () {
+                console.log('CLICK DELIVERY');
+                btnDelivery.style.backgroundColor = '#fbbf24';
+                if (btnRetiro) btnRetiro.style.backgroundColor = 'white';
+                if (direccionContainer) direccionContainer.classList.remove('hidden');
+                const direccion = direccionInput ? (direccionInput.value || '') : '';
+                guardarTipoEntrega('delivery', direccion);
+            });
+        }
 
-        btnRetiro.addEventListener('click', function () {
-            deliverySeleccionado = 0;
-            window.deliverySeleccionado = deliverySeleccionado;
-            actualizarTotal(0);
-        });
-
-        btnDelivery.addEventListener('click', function () {
-            deliverySeleccionado = 2000;
-            window.deliverySeleccionado = deliverySeleccionado;
-            actualizarTotal(2000);
-        });
-
-        // 5. Listeners de los botones
-        btnRetiro.addEventListener('click', function () {
-            console.log('✅ CLICK RETIRO DISPARADO');
-            actualizarTotal(0);
-
-            // estilos de selección
-            btnRetiro.style.backgroundColor = '#fbbf24'; // amarillo
-            btnDelivery.style.backgroundColor = 'white';
-        });
-
-        btnDelivery.addEventListener('click', function () {
-            console.log('✅ CLICK DELIVERY DISPARADO');
-            actualizarTotal(2000);
-
-            btnDelivery.style.backgroundColor = '#fbbf24';
-            btnRetiro.style.backgroundColor = 'white';
-        });
-
-        // 6. Estado inicial (por defecto Retiro)
-        actualizarTotal(0);
+        // Guardar dirección cuando el usuario escriba
+        if (direccionInput) {
+            direccionInput.addEventListener('change', function () {
+                guardarTipoEntrega('delivery', this.value);
+            });
+        }
 
     } catch (error) {
         console.error('❌ Error en miPedido script:', error);

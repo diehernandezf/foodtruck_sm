@@ -7,7 +7,7 @@ class ItemCarritoInline(admin.TabularInline):
 
 @admin.register(Carrito)
 class CarritoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'usuario', 'session_key', 'total_items', 'total', 'creado']
+    list_display = ['id', 'usuario', 'session_key', 'total_items', 'total', 'creado', 'delivery', 'tipo_entrega', 'direccion']
     inlines = [ItemCarritoInline]
 
 @admin.register(ItemCarrito)

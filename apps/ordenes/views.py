@@ -1,8 +1,11 @@
+from decimal import Decimal
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from apps.ordenes.models import Carrito, Pedido
 from apps.usuarios.models import UsuarioPersonalizado
+
+from apps.productos.views import obtener_o_crear_carrito
 
 from django.views.decorators.http import require_POST
 
@@ -11,6 +14,10 @@ from django.views.decorators.http import require_POST
 def ir_miPedido(request):
     carrito = obtener_o_crear_carrito(request)
     items = carrito.items.select_related('producto').all()
+    subtotal = carrito.subtotal
+    es_primer_pedido = False
+    if carrito.usuario:
+        es_primer_pedido = carrito.usuario.total_pedidos == 0
     
     context = {
         'items': [
@@ -18,34 +25,27 @@ def ir_miPedido(request):
                 'id': item.id,
                 'producto_id': item.producto.id,
                 'nombre': item.producto.nombre,
-                'precio_unitario': str(item.precio_unitario),
+                'precio_unitario': float(item.precio_unitario),
                 'cantidad': item.cantidad,
-                'total': str(item.total),
+                'total': float(item.total),
                 'imagen_url': item.producto.imagen_url
             }
             for item in items
         ],
-        'subtotal': str(carrito.subtotal),
-        'total': str(carrito.total),
+        'subtotal': float(carrito.subtotal),
+        'descuento': float(carrito.descuento),
+        'total': float(carrito.total),
         'total_items': carrito.total_items,
-        'usuario': str(carrito.usuario),
+        'usuario': carrito.usuario,
+        'delivery': float(carrito.delivery),
+        'tipo_entrega': carrito.tipo_entrega,
+        'es_primer_pedido': es_primer_pedido,
     }
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse(context)
 
     return render(request, 'miPedido.html', context)
-
-def obtener_o_crear_carrito(request):
-    """Obtiene o crea un carrito para el usuario/sesión actual"""
-    if request.user.is_authenticated:
-        carrito, created = Carrito.objects.get_or_create(usuario=request.user)
-    else:
-        if not request.session.session_key:
-            request.session.create()
-        session_key = request.session.session_key
-        carrito, created = Carrito.objects.get_or_create(session_key=session_key)
-    return carrito
 
 def ir_administrar(request):
     pedidos = Pedido.objects.filter()
@@ -60,5 +60,52 @@ def completar_pedido(request, id_pedido):
     except Pedido.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Pedido no encontrado'}, status=404)
     
+    carrito = obtener_o_crear_carrito(request)
+    carrito.estado = 'pagado'
+    carrito.save()
     pedido.save()
     return JsonResponse({'succes':True})
+
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_POST
+import json
+
+@require_POST
+def actualizar_tipo_entrega(request):
+    # Actuzaliza tipo_entrega y direccion
+    try:
+        carrito = obtener_o_crear_carrito(request)
+        
+        data = json.loads(request.body)
+        tipo_entrega = data.get('tipo_entrega')
+        direccion = data.get('direccion', '')
+        
+        if tipo_entrega not in ['retiro', 'delivery']:
+            return JsonResponse({'success': False, 'error': 'Tipo de entrega inválido'}, status=400)
+        
+        carrito.tipo_entrega = tipo_entrega
+        
+        if tipo_entrega == 'delivery':
+            carrito.delivery = 2000
+            carrito.direccion = direccion
+        else:
+            carrito.delivery = 0
+            carrito.direccion = None
+        
+        carrito.save()
+
+        return JsonResponse({
+            'success': True,
+            'tipo_entrega': carrito.tipo_entrega,
+            'delivery': float(carrito.delivery),
+            'direccion': carrito.direccion,
+            'total': float(carrito.total),
+            'descuento': float(carrito.descuento),
+            'subtotal': float(carrito.subtotal)
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

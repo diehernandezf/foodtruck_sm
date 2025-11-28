@@ -8,6 +8,7 @@
                 <th class="px-4 py-3 font-semibold">N° Pedido</th>
                 <th class="px-4 py-3 font-semibold">Cliente</th>
                 <th class="px-4 py-3 font-semibold">Tipo entrega</th>
+                <th class="px-4 py-3 font-semibold">Direccion</th>
                 <th class="px-4 py-3 font-semibold">Total</th>
                 <th class="px-4 py-3 font-semibold">Estado</th>
                 <th class="px-4 py-3 font-semibold text-red-400">Avisar!</th>
@@ -23,7 +24,10 @@
                     {{ pedido.usuario }}
                 </td>
                 <td class="px-4 py-3">
-                    Tipo entrega
+                    {{ pedido.tipo_entrega }}
+                </td>
+                <td class="px-4 py-3">
+                    {{ pedido.direccion }}
                 </td>
                 <td class="px-4 py-3">
                     ${{ pedido.total }}
@@ -32,16 +36,16 @@
                     <span class="estado-texto">{{ pedido.estado }}</span>
 
                     {% if pedido.estado == 'pagado' %}
-                    <button
+                    <a href="https://wa.me/56{{ pedido.usuario.telefono }}?text=Su%20pedido%20fue%20recibido!!%20Te%20enviaremos%20un%20mensaje%20cuando%20este%20listo.%20Gracias%20por%20tu%20compra!"
                         data-url="{% url 'ordenes:completar_pedido' pedido.id %}"
                         class="btn-completado inline-flex items-center justify-center gap-2 px-4 rounded-xl bg-green-700 font-semibold hover:bg-green-500 text-sm md:text-base">
                         Listo
-                    </button>
+                    </a>
                     {% endif %}
                 </td>
                 <td class="px-4 py-3">
                 {% if pedido.usuario.telefono %}
-                +{{ pedido.usuario.telefono }}
+                {{ pedido.usuario.telefono }}
             {% else %}
                 <span class="text-xs text-gray-400">Sin número</span>
             {% endif %}
@@ -50,6 +54,11 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div>
+    <a class="mt-6 h-10 px-4 flex items-center justify-center rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-500 transition"
+    href="{% url 'dashboard:dashboard' %}">DASHBOARDS</a>
 </div>
 
 <script src="{% static 'js/administrar.js' %}?v=3"></script>

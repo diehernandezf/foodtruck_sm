@@ -5,18 +5,19 @@
 
 <body>
     <main class="min-h-screen flex flex-col">
-        <div id="carrito-data" data-subtotal="{{ subtotal|default:0 }}"></div>
-        <header class="flex items-center justify-between p-6 text-yellow-500">
-            <h1 class="text-2xl font-bold flex items-center">
-                Mi Pedido
-            </h1>
+        <div id="carrito-data" 
+        data-tipo-entrega="{{ tipo_entrega }}"
+        data-direccion="{{ direccion }}"></div> <!--Que hace esta linea?-->
+        <header class="flex items-center justify-start p-6 text-yellow-500">
             <a href="{% url 'productos:home' %}" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
+            <h1 class="text-2xl font-bold flex items-center px-10">
+                Mi Pedido
+            </h1>
         </header>
 
         <section class="flex-1 p-6 overflow-y-auto">
-
             {% if items %}
             <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!--grupo de rectangulos del producto-->
@@ -27,13 +28,13 @@
                         <!-- Imagen del producto -->
                         <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
                             <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="w-full h-full object-cover"
-                                onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'">
+                                onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'"> <!--Que hace onerror?-->
                         </div>
                         <!-- Info del producto -->
                         <div class="flex-1 flex justify-between text-lg font-bold text-yellow-500">
                             <h3>{{ item.nombre }}</h3>
                             <p>× {{ item.cantidad }}</p>
-                            <h4>${{ item.total|intcomma }}</h4>
+                            <h4>${{ item.total|intcomma }}</h4> <!--Que hace intcomma?-->
                         </div>
                     </div>
                     {% endfor %}
@@ -41,79 +42,69 @@
 
                 <!-- Resuemn del pedido -->
                 <div class="lg:col-span-1">
-
-                    <!-- Card sticky que se queda fijo al hacer scroll -->
-                    <div
-                        class="text-yellow-500 bg-[#1A1A1A] rounded-lg shadow-md border border-yellow-500 p-6 sticky top-6">
+                    <div class="text-yellow-500 bg-[#1A1A1A] rounded-lg shadow-md border border-yellow-500 p-6 sticky top-6">
                         <h2 class="text-xl font-bold mb-4 pb-4 border-b border-black/10">
                             Resumen del Pedido
                         </h2>
-
                         <!-- Detalles -->
-                        <div class="space-y-3 mb-6">
+                        <div class="space-y-3 mb-4">
                             <div class="flex justify-between text-text-secondary-light text-yellow-600">
                                 <span>Subtotal:</span>
-                                <span class="font-semibold">${{ subtotal|intcomma }}</span>
+                                <span class="font-semibold" data-subtotal>${{ subtotal|floatformat:0|intcomma }}</span> <!--Se obtiene del modelo carrito ¿como funciona data-subtotal?-->
                             </div>
-
+                            {% if es_primer_pedido %}
                             <div class="flex justify-between text-text-secondary-light text-yellow-600">
-                                <span>Delivery:</span>
-                                <span class="font-semibold" data-delivery>$0</span>
+                                <span>Descuento 30% (Primer pedido){{ usuario }}</span>
+                                <span class="font-semibold" data-descuento>-${{ descuento|floatformat:0|intcomma }}</span> <!--Se debe obtener-->
                             </div>
-
-                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
-                                <span>Descuentos: {{ usuario }}</span>
-                                <span class="font-semibold">$0</span>
-                            </div>
-
-                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
-                                <span>Total de items:</span>
-                                <span class="font-semibold">{{ total_items }}</span>
-                            </div>
-
+                            {% endif %}
                             <!-- Línea separadora -->
                             <div class="border-t border-white pt-3 mt-3">
                                 <div class="flex justify-between items-center text-2xl font-bold">
+                                <span>Delivery:</span>
+                                <span data-delivery>${{ delivery|floatformat:0|intcomma }}</span> <!--valor se obtiene con js? como? ELIMINAR DEL JS TODO LO QUE TENGA QUE VER CON EL CALCULO-->
+                            </div>
+                                <div class="flex justify-between items-center text-2xl font-bold">
                                     <span>TOTAL:</span>
-                                    <span class="text-yellow-500" data-total>${{ total|intcomma }}</span>
+                                    <span data-total>${{ total|floatformat:0|intcomma }}</span> <!--Se obtiene del modelo carrito-->
                                 </div>
                             </div>
                         </div>
 
                         <!--Botones opcion entrega-->
                         <div class="flex justify-between text-black py-2">
-    <span>
-        <button id="btn-retiro" class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
-            Retiro
-        </button>
-    </span>
-    <span>
-        <button id="btn-delivery" class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
-            Delivery
-        </button>
-    </span>
-</div>
-
+                            <span>          <!--Se maneja btn-retiro del JS--> 
+                                <button id="btn-retiro"     
+                                    class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+                                    Retiro
+                                </button>
+                            </span>
+                            <span>           <!--Se maneja btn-delivery del JS-->
+                                <button id="btn-delivery"
+                                    class="bg-white text-center font-semibold px-8 py-2 rounded-lg hover:bg-yellow-500 transition-colors">
+                                    Delivery
+                                </button>
+                            </span>
+                        </div>
+                        <div id="direccion-container" class="hidden mt-2">   <!--Se maneja direccion-input del JS-->
+                            <label class="block text-black font-semibold mb-2 text-white">Dirección (Revise diametro de entrega abajo ❗❗)</label>
+                            <input type="text" id="direccion-input" placeholder="Ingresa tu dirección" class="w-full rounded-lg text-black mb-3">
+                        </div>
                         <!-- Botones de acción -->
                         <div class="space-y-3 text-black">
                             <a onclick="pagar_carrito()"
-                                class="w-full bg-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined">shopping_cart_checkout</span>
-                                Proceder al Pago
+                                class="w-full bg-white font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                                <span class="material-symbols-outlined">shopping_cart_checkout</span>Proceder al Pago
                             </a>
-
-                            <div class="text-black">
                                 <a href="{% url 'productos:home' %}"
                                     class=" block w-full text-center bg-white font-semibold py-2 rounded-lg hover:bg-yellow-500 transition-colors">
                                     Seguir Comprando
                                 </a>
-                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
-
             {% else %}
             <!-- Carrito vacío -->
             <div class="text-center py-16">
@@ -127,10 +118,14 @@
             </div>
             {% endif %}
         </section>
-        
+
+        <section class="flex flex-col justify-center items-center py-10 gap-6">
+            <h2 class="text-2xl font-bold text-center text-white">Diámetro de entrega</h2>
+            <img src="https://res.cloudinary.com/dnvcewwiv/image/upload/v1764109509/radio-delivery_zyu6yy.jpg" alt="Imagen radio de entrega delivery" class="max-w-full h-auto rounded-lg shadow-lg">
+        </section>
     </main>
 
-    <script src="{% static 'js/carrito.js' %}?v=7"></script>
+    <script src="{% static 'js/carrito.js' %}?v=15"></script>
 
 </body>
 {% endblock %}
