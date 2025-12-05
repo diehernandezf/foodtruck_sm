@@ -1,0 +1,58 @@
+{% extends 'pages/layout.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="bg-gray-900/80 rounded-lg p-6 text-white">
+        <h1 class="text-2xl font-bold mb-6">Pedido #{{ pedido.id }}</h1>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <p class="text-gray-400">Cliente:</p>
+                <p class="font-semibold">{{ pedido.usuario.username }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">Estado:</p>
+                <p class="font-semibold">{{ pedido.estado }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">Tipo de entrega:</p>
+                <p class="font-semibold">{{ pedido.tipo_entrega }}</p>
+            </div>
+            <div>
+                <p class="text-gray-400">Dirección:</p>
+                <p class="font-semibold">{{ pedido.direccion|default:"Retiro en local" }}</p>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4">Productos</h2>
+        <table class="w-full mb-6">
+            <thead class="border-b border-white/20">
+                <tr class="text-left">
+                    <th class="pb-2">Producto</th>
+                    <th class="pb-2">Cantidad</th>
+                    <th class="pb-2">Precio</th>
+                    <th class="pb-2">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in detalles %}
+                <tr class="border-b border-white/10">
+                    <td class="py-2">{{ detalle.nombre_producto }}</td>
+                    <td class="py-2">{{ detalle.cantidad }}</td>
+                    <td class="py-2">${{ detalle.precio_unitario|floatformat:0 }}</td>
+                    <td class="py-2">${{ detalle.subtotal|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="text-right">
+            <p class="text-xl font-bold">Total: ${{ pedido.total|floatformat:0 }}</p>
+        </div>
+
+        <a href="{% url 'ordenes:administrar' %}" 
+           class="mt-6 block w-full bg-yellow-500 text-center text-white font-bold py-3 rounded-lg hover:bg-yellow-400">
+            Volver
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -112,22 +112,22 @@ function renderizarItems(items) {
 
     items.forEach(item => {
         const itemHtml = `
-            <div class="flex gap-4 p-4 bg-surface-light dark:bg-surface-dark rounded-lg" data-item-id="${item.id}">
+            <div class="flex gap-4 p-4 bg-black text-white rounded-lg" data-item-id="${item.id}">
                 <img src="${item.imagen_url}" alt="${item.nombre}" 
                     class="w-20 h-20 object-cover rounded-lg">
                 <div class="flex-1">
                     <h4 class="font-semibold text-sm">${item.nombre}</h4>
-                    <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <p class="text-sm text-white">
                         $${formatearPrecio(item.precio_unitario)}
                     </p>
                     <div class="flex items-center gap-2 mt-2">
                         <button onclick="cambiarCantidad(${item.id}, ${item.cantidad - 1})" 
-                                class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center">
+                                class="w-8 h-8 rounded-full bg-white  hover:bg-gray-300  flex items-center justify-center text-black">
                             <span class="text-lg">-</span>
                         </button>
                         <span class="w-8 text-center font-semibold">${item.cantidad}</span>
                         <button onclick="cambiarCantidad(${item.id}, ${item.cantidad + 1})" 
-                                class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 flex items-center justify-center">
+                                class="w-8 h-8 rounded-full bg-white  hover:bg-gray-300  flex items-center justify-center text-black">
                             <span class="text-lg">+</span>
                         </button>
                         <button onclick="eliminarItem(${item.id})" 

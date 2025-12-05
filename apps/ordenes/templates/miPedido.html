@@ -4,6 +4,7 @@
 {% block content %}
 
 <body>
+    {% csrf_token %}
     <main class="min-h-screen flex flex-col">
         <div id="carrito-data" 
         data-tipo-entrega="{{ tipo_entrega }}"
@@ -28,13 +29,13 @@
                         <!-- Imagen del producto -->
                         <div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
                             <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="w-full h-full object-cover"
-                                onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'"> <!--Que hace onerror?-->
+                                onerror="this.src='https://via.placeholder.com/150?text=Sin+Imagen'">
                         </div>
                         <!-- Info del producto -->
                         <div class="flex-1 flex justify-between text-lg font-bold text-yellow-500">
                             <h3>{{ item.nombre }}</h3>
                             <p>× {{ item.cantidad }}</p>
-                            <h4>${{ item.total|intcomma }}</h4> <!--Que hace intcomma?-->
+                            <h4>${{ item.total|intcomma }}</h4>
                         </div>
                     </div>
                     {% endfor %}
@@ -54,7 +55,12 @@
                             </div>
                             {% if es_primer_pedido %}
                             <div class="flex justify-between text-text-secondary-light text-yellow-600">
-                                <span>Descuento 30% (Primer pedido){{ usuario }}</span>
+                                <span>Descuento 30% (Primer pedido) {{ usuario }}</span>
+                                <span class="font-semibold" data-descuento>-${{ descuento|floatformat:0|intcomma }}</span> <!--Se debe obtener-->
+                            </div>
+                            {% else %}
+                            <div class="flex justify-between text-text-secondary-light text-yellow-600">
+                                <span>Descuentos {{ usuario }}</span>
                                 <span class="font-semibold" data-descuento>-${{ descuento|floatformat:0|intcomma }}</span> <!--Se debe obtener-->
                             </div>
                             {% endif %}

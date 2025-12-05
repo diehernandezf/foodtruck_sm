@@ -3,68 +3,64 @@
 {% block content %}
 
 <body class="bg-background-light font-display text-text-light">
-
     <!-- Overlay del carrito -->
     <div id="carrito-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"></div>
 
     <!-- Panel lateral del carrito -->
     <div id="carrito-panel"
-        class="fixed right-0 top-0 h-full w-full max-w-md bg-background-light shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        class="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
         <div class="flex flex-col h-full">
             <!-- Header del carrito -->
-            <div class="flex items-center justify-between p-4 border-b border-black/10">
-                <h3 class="text-xl font-bold flex items-center gap-2">
+            <div class="flex items-center justify-between p-4 border-b border-black/10 bg-black">
+                <h3 class="text-xl font-bold flex items-center gap-2 text-yellow-500">
                     <span class="material-symbols-outlined">shopping_cart</span>
                     Tu Carrito
                 </h3>
                 <button id="cerrar-carrito" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <span class="material-symbols-outlined">close</span>
+                    <span class="material-symbols-outlined text-yellow-500">close</span>
                 </button>
             </div>
 
             <!-- Contenido del carrito -->
-            <div class="flex-1 overflow-y-auto p-4">
+            <div class="flex-1 overflow-y-auto p-4 bg-[#222222]">
                 <!-- Carrito vacío -->
-                <div id="carrito-vacio" class="hidden text-center py-12">
+                <div id="carrito-vacio" class="hidden text-center py-12 text-white">
                     <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">shopping_cart</span>
-                    <p class="text-lg text-text-secondary-light">Tu carrito está vacío</p>
-                    <p class="text-sm text-text-secondary-light mt-2">¡Agrega algunos productos deliciosos!</p>
+                    <p class="text-lg">Tu carrito está vacío</p>
+                    <p class="text-sm">¡Agrega algunos productos deliciosos!</p>
                 </div>
 
                 <!-- Contenido del carrito -->
                 <div id="carrito-contenido" class="hidden">
                     <div id="carrito-items" class="space-y-3">
-                        <!-- Los items se cargarán dinámicamente aquí -->
+                        <!-- Los items se cargan aquí -->
                     </div>
                 </div>
             </div>
 
             <!-- Footer carrito -->
-            <div id="carrito-footer" class="border-t border-black/10 p-4 space-y-3">
-                <div class="flex justify-between items-center text-lg font-bold">
+            <div id="carrito-footer" class="border-t border-black/10 p-4 space-y-3 bg-black">
+                <div class="flex justify-between items-center text-lg font-bold mb-4 text-white">
                     <span>Total:</span>
                     <span id="carrito-total">${{ subtotal }}</span>
                 </div>
                 <a id="iniciar_pago_btn" href="{% url 'ordenes:miPedido' %}"
-                    class="w-full bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-400 transition-colors">
+                    class="block text-center w-full bg-yellow-500 text-white font-bold py-3 rounded-lg hover:bg-yellow-400 transition-colors">
                     Siguiente
                 </a>
                 <button id="vaciar-carrito"
-                    class="w-full bg-gray-200 text-text-light font-semibold py-2 rounded-lg hover:bg-gray-300 transition-colors">
+                    class="w-full bg-yellow-500 text-white font-semibold py-2 rounded-lg hover:bg-yellow-400 transition-colors">
                     Vaciar Carrito
                 </button>
             </div>
         </div>
     </div>
 
-
-
     <!--PRODUCTOS-->
     <div class="relative flex min-h-screen w-full flex-col">
 
         <main class="flex w-full flex-1 flex-col items-center">
             <div class="w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-
                 <!-- IMG CARRITO FOODTRUCK -->
                 <div class="w-full @container">
                     <div class="@[480px]:p-4">
@@ -82,7 +78,7 @@
                 </div>
 
                 <!-- FILTRO POR CATEGORIAS -->
-                <div id="seccion-productos" class="flex justify-center py-8">
+                <div id="seccion-productos" class="flex justify-center py-8"> <!--Donde se utiliza el id-->
                     <div class="flex gap-2 overflow-x-auto p-2 sm:gap-3">
                         <a href="{% url 'productos:home' %}"
                             class="flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-5 shadow-sm transition-all
@@ -178,14 +174,14 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-red-800 text-white py-16 px-4">
+        <footer class="bg-yellow-500 text-white py-16 px-4">
             <div class="max-w-6xl mx-auto">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
 
                     <!-- Izquierda - Ubicación -->
-                    <div class="flex flex-col justify-start">
+                    <div class="flex flex-col justify-start text-black">
                         <h3 class="text-xl font-bold mb-4">📍 Ubicación</h3>
-                        <p class="text-sm leading-relaxed text-gray-100">
+                        <p class="text-sm leading-relaxed">
                             Avenida Gabriela Oriente 01216<br>
                             Puente Alto, Chile<br>
                         </p>
@@ -201,7 +197,7 @@
                                 class="bg-white rounded-full p-3 hover:scale-110 transition-transform" title="WhatsApp">
                                 <i class="fab fa-whatsapp text-red-800 text-2xl"></i>
                             </a>
-                            <a href="#" target="_blank" rel="noopener noreferrer"
+                            <a href="https://www.instagram.com/foodtruck.sanmartin/" target="_blank" rel="noopener noreferrer"
                                 class="bg-white rounded-full p-3 hover:scale-110 transition-transform"
                                 title="Instagram">
                                 <i class="fab fa-instagram text-red-800 text-2xl"></i>
@@ -210,9 +206,9 @@
                     </div>
 
                     <!-- Derecha - Pedidos por WhatsApp -->
-                    <div class="flex flex-col justify-start md:text-right">
+                    <div class="flex flex-col justify-start md:text-right text-black">
                         <h3 class="text-xl font-bold mb-4">📱 Haz tu Pedido</h3>
-                        <p class="text-sm leading-relaxed text-gray-100">
+                        <p class="text-sm leading-relaxed">
                             ¿Prefieres hacer tu pedido por WhatsApp?<br>
                             <br>
                             Envíanos un mensaje directo con tu solicitud y nos pondremos en contacto de inmediato.<br>
@@ -260,6 +256,6 @@
         const usuarioLogeado = {{ user.is_authenticated|yesno:"true,false" }};
     </script>
 
-    <script src="/static/js/carrito.js?v=16"></script>
+    <script src="/static/js/carrito.js?v=20"></script>
 </body>
 {% endblock %}

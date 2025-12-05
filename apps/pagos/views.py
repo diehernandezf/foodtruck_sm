@@ -11,16 +11,7 @@ from transbank.webpay.webpay_plus.transaction import Transaction
 from transbank.common.integration_type import IntegrationType
 from transbank.common.options import WebpayOptions
 from apps.ordenes.models import Carrito, Pedido, DetallePedido
-from django.contrib.auth import get_user_model
-
-    # """Create a Transaction using WebpayOptions constructed from Django settings.
-
-    # The installed Transbank SDK exposes WebpayOptions/Options; older code referenced
-    # WebpayPlus.default_* attributes which are not present in this SDK version.
-    # Use settings.TRANSBANK_COMMERCE_CODE and settings.TRANSBANK_API_KEY instead.
-    # """
-    
-    # Map environment string to IntegrationType if desired; default to TEST for development
+from apps.productos.views import obtener_o_crear_carrito
 
 def get_transaction(): # Crea el cliente de Transbank
     commerce_code = getattr(settings, 'TRANSBANK_COMMERCE_CODE', None)
@@ -29,14 +20,12 @@ def get_transaction(): # Crea el cliente de Transbank
     options = WebpayOptions(commerce_code, api_key, integration)
     return Transaction(options)
 
-# (esto evita que django valide el token cuando se hace una request desde el token a la vista)
-@csrf_exempt
 def iniciar_pago(request):
     try:
         if request.method == 'POST':
             data = json.loads(request.body)
             direccion = data.get('direccion', '')
-            carrito = obtener_carrito(request)
+            carrito = obtener_o_crear_carrito(request)
 
             if not carrito:
                 return JsonResponse({'error': 'No hay un carrito activo'}, status=400)
@@ -106,6 +95,9 @@ def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
         if carrito:
             usuario = carrito.usuario
 
+            descuento_aplicado = carrito.descuento
+            total_con_descuento = carrito.total
+
             carrito.pagado = True
             carrito.activo = False
             carrito.save()
@@ -114,7 +106,7 @@ def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
             pedido = Pedido.objects.create(
                 usuario = usuario,
                 token = token,
-                total = carrito.total,
+                total = total_con_descuento,
                 estado = 'pagado',
                 codigo_autorizacion = response.get('authorization_code', ''),
                 orden_compra = response.get('buy_order', ''),
@@ -134,59 +126,9 @@ def retorno_pago(request): # Maneja el retorno despues del pago con Webpay Plus
                     subtotal = item.cantidad * item.producto.precio
                 )
 
-        return render(request, 'exito.html', {'response': response, 'pedido':pedido, 'carrito':carrito})
+        return render(request, 'exito.html', {'response': response, 'pedido':pedido, 'carrito':carrito, 'descuento_aplicado':descuento_aplicado})
     else:
         return render(request, 'error.html', {'response': response})
 
 def generar_orden():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-
-def obtener_carrito(request):
-    """
-    Recupera o crea el carrito 'abierto' para:
-    - Usuario autenticado: por campo 'usuario'
-    - Usuario anónimo: por 'session_key'
-    Usa tus campos reales: 'usuario', 'activo', 'pagado'
-    """
-    # Asegura session_key
-    if not request.session.session_key:
-        request.session.save()
-    session_key = request.session.session_key
-
-    # Si está autenticado, prioriza carrito por usuario
-    if request.user.is_authenticated:
-        carrito = Carrito.objects.filter(usuario=request.user, activo=True, pagado=False).first()
-        if carrito:
-            # Sincroniza session_key si cambió
-            if carrito.session_key != session_key:
-                carrito.session_key = session_key
-                carrito.save(update_fields=['session_key'])
-            return carrito
-
-        # Si no hay por usuario, intenta por session_key actual (anónimo) y "elevarlo"
-        carrito = Carrito.objects.filter(session_key=session_key, activo=True, pagado=False).first()
-        if carrito:
-            carrito.usuario = request.user
-            carrito.save(update_fields=['usuario'])
-            return carrito
-
-        # No existe ninguno → crea uno nuevo para el usuario
-        return Carrito.objects.create(
-            usuario=request.user,
-            session_key=session_key,
-            activo=True,
-            pagado=False
-        )
-
-    # Usuario anónimo → trabaja por session_key
-    carrito = Carrito.objects.filter(session_key=session_key, activo=True, pagado=False).first()
-    if carrito:
-        return carrito
-
-    # Crea carrito anónimo
-    return Carrito.objects.create(
-        usuario=None,
-        session_key=session_key,
-        activo=True,
-        pagado=False
-    )

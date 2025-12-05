@@ -8,36 +8,19 @@ from django.core.paginator import Paginator
 
 # Create your views here.
 def obtener_o_crear_carrito(request):
-    """
-    Obtiene o crea un carrito para el usuario/sesión actual.
-    Evita usar get_or_create para no disparar MultipleObjectsReturned
-    y limpia duplicados si los hay.
-    """
-
-    # Aseguramos que exista session_key SIEMPRE
+    # Aseguramos que haya session_key
     if not request.session.session_key:
         request.session.create()
     session_key = request.session.session_key
 
-    # ------------------------
     # Usuario autenticado
-    # ------------------------
     if request.user.is_authenticated:
-        # ✅ CAMBIO: Agregar filtro activo=True
-        qs = Carrito.objects.filter(
-            usuario=request.user, 
-            activo=True,
-            pagado=False
-        ).order_by('-id')
+        qs = Carrito.objects.filter(usuario=request.user, activo=True, pagado=False).order_by('-id')
         carrito = qs.first()
 
         # Si hay más de uno, dejamos el más nuevo y borramos el resto
         if qs.count() > 1:
-            Carrito.objects.filter(
-                usuario=request.user,
-                activo=True,
-                pagado=False
-            ).exclude(id=carrito.id).delete()
+            Carrito.objects.filter(usuario=request.user, activo=True, pagado=False).exclude(id=carrito.id).delete()
 
         # Si ya existe uno, lo usamos
         if carrito:
@@ -47,42 +30,21 @@ def obtener_o_crear_carrito(request):
             return carrito
 
         # Si no existe ninguno, creamos uno nuevo
-        return Carrito.objects.create(
-            usuario=request.user, 
-            session_key=session_key,
-            activo=True
-        )
+        return Carrito.objects.create(usuario=request.user, session_key=session_key, activo=True)
 
-    # ------------------------
     # Usuario NO autenticado
-    # ------------------------
-    # ✅ CAMBIO: Agregar filtro activo=True
-    qs = Carrito.objects.filter(
-        session_key=session_key,
-        usuario__isnull=True,
-        activo=True,
-        pagado=False
-    ).order_by('-id')
-
+    qs = Carrito.objects.filter(session_key=session_key, usuario__isnull=True, activo=True, pagado=False).order_by('-id')
     carrito = qs.first()
 
     # Limpiamos duplicados de sesión (anónimos)
     if qs.count() > 1:
-        Carrito.objects.filter(
-            session_key=session_key,
-            usuario__isnull=True,
-            activo=True,
-            pagado=False
-        ).exclude(id=carrito.id).delete()
+        Carrito.objects.filter(session_key=session_key, usuario__isnull=True, activo=True, pagado=False).exclude(id=carrito.id).delete()
 
     if carrito:
         return carrito
 
     # Si no hay carrito anónimo, creamos uno
-    return Carrito.objects.create(
-        session_key=session_key,
-        activo=True
-    )
+    return Carrito.objects.create(session_key=session_key, activo=True)
 
 
 def ir_inicio(request):
@@ -101,9 +63,7 @@ def ir_inicio(request):
     total_items = carrito.total_items
     
     context = {
-        'productos': pagina,
         'categorias': categorias,
-        'total_items_carrito': total_items,
         'pagina':pagina,
         'subtotal': float(carrito.subtotal)
     }
@@ -112,7 +72,7 @@ def ir_inicio(request):
 
 @require_POST
 def agregar_al_carrito(request):
-    """Agrega un producto al carrito vía AJAX"""
+    # Agrega un producto al carrito vía AJAX
     try:
         data = json.loads(request.body)
         producto_id = data.get('producto_id')
@@ -146,7 +106,6 @@ def agregar_al_carrito(request):
 
 
 def ver_carrito(request):
-    """Vista para ver el contenido del carrito"""
     carrito = obtener_o_crear_carrito(request)
     items = carrito.items.select_related('producto').all()
     
@@ -176,7 +135,6 @@ def ver_carrito(request):
 
 @require_POST
 def actualizar_cantidad(request):
-    """Actualiza la cantidad de un item en el carrito"""
     try:
         data = json.loads(request.body)
         item_id = data.get('item_id')
@@ -210,7 +168,6 @@ def actualizar_cantidad(request):
 
 @require_POST
 def eliminar_del_carrito(request):
-    """Elimina un item del carrito"""
     try:
         data = json.loads(request.body)
         item_id = data.get('item_id')
@@ -246,7 +203,6 @@ def eliminar_del_carrito(request):
 
 @require_POST
 def vaciar_carrito(request):
-    """Vacía el carrito completo"""
     try:
         carrito = obtener_o_crear_carrito(request)
         carrito.items.all().delete()
@@ -261,9 +217,3 @@ def vaciar_carrito(request):
             'success': False,
             'message': str(e)
         }, status=400)
-    
-###
-#CRUD PRODUCTOS
-###
-def ir_crud_productos(request):
-    return render(request, "crud_productos.html")

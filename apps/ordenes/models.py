@@ -14,12 +14,7 @@ class Carrito(models.Model):
         ('cancelado', 'Cancelado'),
         ('completado', 'Completado'),
     ]
-    usuario = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True
-    )
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     session_key = models.CharField(max_length=40, null=True, blank=True)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
@@ -64,10 +59,19 @@ class Carrito(models.Model):
     
     @property
     def descuento(self):
-        total_pedidos = getattr(self.usuario, 'total_pedidos', 0) if self.usuario else 0
-        if total_pedidos == 0:
-            return self.subtotal * Decimal('0.30')
-        return Decimal('0')
+        try:
+            subtotal = self.subtotal
+            if not subtotal or subtotal == 0:
+                return Decimal('0')
+            total_pedidos = getattr(self.usuario, 'total_pedidos', 0) if self.usuario else 0
+            if total_pedidos == 0:
+                return subtotal * Decimal('0.30')
+            elif (total_pedidos + 1) % 3 == 0:
+                return subtotal * Decimal('0.25')
+            else:
+                return Decimal('0')
+        except:
+            return Decimal('0')
     
     @property
     def total(self):
@@ -76,15 +80,8 @@ class Carrito(models.Model):
 
 
 class ItemCarrito(models.Model):
-    carrito = models.ForeignKey(
-        Carrito, 
-        on_delete=models.CASCADE, 
-        related_name='items'
-    )
-    producto = models.ForeignKey(
-        Producto, 
-        on_delete=models.CASCADE
-    )
+    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     creado = models.DateTimeField(auto_now_add=True)
@@ -114,13 +111,7 @@ class Pedido(models.Model):
         ('cancelado', 'Cancelado'),
         ('completado', 'Completado'),
     ]
-    usuario = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True,
-        related_name='pedidos'
-    )
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='pedidos')
     token = models.CharField(max_length=100)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
@@ -138,7 +129,10 @@ class Pedido(models.Model):
         verbose_name_plural = 'Pedidos'
     
     def __str__(self):
-        return f"Pedido #{self.id} - {self.usuario.username} - ${self.total}"
+        if self.usuario:
+            return f"Pedido #{self.id} - {self.usuario.username}"
+        else:
+            return f"Pedido #{self.id} - Anónimo"
     
 class DetallePedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalles')
@@ -156,6 +150,5 @@ class DetallePedido(models.Model):
         return f"{self.cantidad}x {self.nombre_producto}"
     
     def save(self, *args, **kwargs):
-        # Calcula el subtotal automáticamente
         self.subtotal = self.cantidad * self.precio_unitario
         super().save(*args, **kwargs)

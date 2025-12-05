@@ -1,7 +1,4 @@
 from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F
 from django.utils import timezone
@@ -21,16 +18,33 @@ def dashboard(request):
     
     if periodo == 'dia':
         fecha_inicio = ahora.replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_inicio_anterior = fecha_inicio - timedelta(days=1)
+        fecha_fin_anterior = fecha_inicio
     elif periodo == 'semana':
         fecha_inicio = ahora - timedelta(days=ahora.weekday())
         fecha_inicio = fecha_inicio.replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_inicio_anterior = fecha_inicio - timedelta(days=7)
+        fecha_fin_anterior = fecha_inicio
     else:  # mes
         fecha_inicio = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        # Calcular primer día del mes anterior
+        if fecha_inicio.month == 1:
+            fecha_inicio_anterior = fecha_inicio.replace(year=fecha_inicio.year - 1, month=12)
+        else:
+            fecha_inicio_anterior = fecha_inicio.replace(month=fecha_inicio.month - 1)
+        fecha_fin_anterior = fecha_inicio
     
-    # Filtrar pedidos pagados en el período
+    # Filtrar pedidos del período actual
     pedidos = Pedido.objects.filter(
-        estado='pagado',
+        estado__in=['pagado', 'completado'],
         fecha__gte=fecha_inicio
+    )
+    
+    # Filtrar pedidos del período anterior
+    pedidos_anteriores = Pedido.objects.filter(
+        estado__in=['pagado', 'completado'],
+        fecha__gte=fecha_inicio_anterior,
+        fecha__lt=fecha_fin_anterior
     )
     
     # KPI 1: Ventas totales
@@ -41,7 +55,8 @@ def dashboard(request):
     
     # KPI 3: Ventas por hora (últimas 24 horas)
     hace_24h = ahora - timedelta(hours=24)
-    ventas_por_hora = pedidos.filter(
+    ventas_por_hora = Pedido.objects.filter(
+        estado__in=['pagado', 'completado'],
         fecha__gte=hace_24h
     ).annotate(
         hora=TruncHour('fecha')
@@ -56,7 +71,7 @@ def dashboard(request):
     
     # KPI 4: Productos más vendidos (Top 5)
     productos_top = DetallePedido.objects.filter(
-        pedido__estado='pagado',
+        pedido__estado__in=['pagado', 'completado'],
         pedido__fecha__gte=fecha_inicio
     ).values('nombre_producto').annotate(
         cantidad=Sum('cantidad'),
@@ -65,59 +80,32 @@ def dashboard(request):
     
     # KPI 5: Productos menos vendidos (Top 5)
     productos_bottom = DetallePedido.objects.filter(
-        pedido__estado='pagado',
+        pedido__estado__in=['pagado', 'completado'],
         pedido__fecha__gte=fecha_inicio
     ).values('nombre_producto').annotate(
         cantidad=Sum('cantidad'),
         total=Sum('subtotal')
     ).order_by('cantidad')[:5]
     
-    # KPI 6: Comparación semanal/mensual
-    if periodo == 'mes':
-        # Comparar este mes con mes anterior
-        fecha_mes_anterior = fecha_inicio - timedelta(days=1)
-        fecha_inicio_mes_anterior = fecha_mes_anterior.replace(day=1)
-        
-        ventas_mes_actual = pedidos.aggregate(total=Sum('total'))['total'] or 0
-        ventas_mes_anterior = Pedido.objects.filter(
-            estado='pagado',
-            fecha__gte=fecha_inicio_mes_anterior,
-            fecha__lt=fecha_inicio
-        ).aggregate(total=Sum('total'))['total'] or 0
-        
-        comparacion_periodo_actual = ventas_mes_actual
-        comparacion_periodo_anterior = ventas_mes_anterior
-        label_comparacion = 'Mes'
-    else:
-        # Comparar esta semana con semana anterior
-        fecha_semana_anterior = fecha_inicio - timedelta(days=7)
-        
-        ventas_semana_actual = pedidos.aggregate(total=Sum('total'))['total'] or 0
-        ventas_semana_anterior = Pedido.objects.filter(
-            estado='pagado',
-            fecha__gte=fecha_semana_anterior,
-            fecha__lt=fecha_inicio
-        ).aggregate(total=Sum('total'))['total'] or 0
-        
-        comparacion_periodo_actual = ventas_semana_actual
-        comparacion_periodo_anterior = ventas_semana_anterior
-        label_comparacion = 'Semana'
+    # KPI 6: Comparación de períodos
+    ventas_periodo_actual = ventas_totales
+    ventas_periodo_anterior = pedidos_anteriores.aggregate(total=Sum('total'))['total'] or 0
     
     # KPI 7: Tasa de crecimiento
-    if comparacion_periodo_anterior > 0:
-        tasa_crecimiento = ((comparacion_periodo_actual - comparacion_periodo_anterior) / comparacion_periodo_anterior) * 100
+    if ventas_periodo_anterior > 0:
+        tasa_crecimiento = ((ventas_periodo_actual - ventas_periodo_anterior) / ventas_periodo_anterior) * 100
     else:
-        tasa_crecimiento = 0 if comparacion_periodo_actual == 0 else 100
+        tasa_crecimiento = 0 if ventas_periodo_actual == 0 else 100
     
     # KPI 8: Tasa de Repetición de Clientes
-    # Clientes únicos en el período
-    clientes_periodo = pedidos.values('usuario').distinct().count()
+    # Clientes únicos en el período actual
+    clientes_periodo = pedidos.filter(
+        usuario__isnull=False
+    ).values('usuario').distinct().count()
     
-    # Clientes que compraron más de una vez
-    clientes_repetidos = Pedido.objects.filter(
-        usuario__isnull=False,
-        estado='pagado',
-        fecha__gte=fecha_inicio
+    # Clientes que compraron más de una vez en el período actual
+    clientes_repetidos = pedidos.filter(
+        usuario__isnull=False
     ).values('usuario').annotate(
         compras=Count('id')
     ).filter(compras__gt=1).count()
@@ -126,6 +114,14 @@ def dashboard(request):
         tasa_repeticion = (clientes_repetidos / clientes_periodo) * 100
     else:
         tasa_repeticion = 0
+    
+    # Determinar label de comparación
+    if periodo == 'dia':
+        label_comparacion = 'Día'
+    elif periodo == 'semana':
+        label_comparacion = 'Semana'
+    else:
+        label_comparacion = 'Mes'
     
     # Preparar datos para contexto
     context = {
@@ -136,8 +132,8 @@ def dashboard(request):
         'horas_datos': json.dumps(horas_datos),
         'productos_top': list(productos_top),
         'productos_bottom': list(productos_bottom),
-        'comparacion_periodo_actual': float(comparacion_periodo_actual),
-        'comparacion_periodo_anterior': float(comparacion_periodo_anterior),
+        'comparacion_periodo_actual': float(ventas_periodo_actual),
+        'comparacion_periodo_anterior': float(ventas_periodo_anterior),
         'label_comparacion': label_comparacion,
         'tasa_crecimiento': round(tasa_crecimiento, 2),
         'tasa_repeticion': round(tasa_repeticion, 2),

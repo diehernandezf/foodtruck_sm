@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from apps.ordenes.models import Carrito, Pedido
 from apps.usuarios.models import UsuarioPersonalizado
@@ -9,12 +9,13 @@ from apps.productos.views import obtener_o_crear_carrito
 
 from django.views.decorators.http import require_POST
 
+import json
+
 # Create your views here.
 
 def ir_miPedido(request):
     carrito = obtener_o_crear_carrito(request)
     items = carrito.items.select_related('producto').all()
-    subtotal = carrito.subtotal
     es_primer_pedido = False
     if carrito.usuario:
         es_primer_pedido = carrito.usuario.total_pedidos == 0
@@ -66,14 +67,8 @@ def completar_pedido(request, id_pedido):
     pedido.save()
     return JsonResponse({'succes':True})
 
-from django.http import JsonResponse
-from django.shortcuts import render
-from django.views.decorators.http import require_POST
-import json
-
 @require_POST
 def actualizar_tipo_entrega(request):
-    # Actuzaliza tipo_entrega y direccion
     try:
         carrito = obtener_o_crear_carrito(request)
         
@@ -109,3 +104,13 @@ def actualizar_tipo_entrega(request):
         return JsonResponse({'success': False, 'error': 'JSON inválido'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+def detalle_pedido(request, pedido_id):
+    pedido = get_object_or_404(Pedido, id=pedido_id)
+    detalles = pedido.detalles.all()
+    
+    context = {
+        'pedido': pedido,
+        'detalles': detalles,
+    }
+    return render(request, 'detalle_pedido.html', context)

@@ -57,6 +57,9 @@
                     <p>
                         <span class="font-semibold">Direccion:</span> {{ pedido.direccion }}
                     </p>
+                    <p>
+                        <span class="font-semibold">TOTAL:</span> {{ pedido.total }}
+                    </p>
                     <div class="mt-2 rounded-xl bg-emerald-500/10 border border-emerald-400/40 px-4 py-3 flex items-center gap-3">
                 <div class="flex h-10 w-12 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-400/60">
                     <span class="material-symbols-outlined text-lg text-emerald-400">
@@ -65,78 +68,12 @@
                 </div>
                 <div>
                     <p class="text-base text-white">
-                        Sigue asi y en tu 3er pedido obten 30% de 
-                        <span class="font-semibold text-emerald-300">desuento!!!</span>
+                        Sigue asi y en tu 3er pedido obten
+                        <span class="font-semibold text-red-500 text-xl">30% de desuento!!!</span>
                         Vuelve pronto
                     </p>
                 </div>
             </div>
-                </div>
-            </div>
-
-            <!-- Detalle de productos -->
-            <div class="mt-4">
-                <h3 class="text-base font-semibold text-white mb-2 uppercase tracking-wide">
-                    Detalle de productos
-                </h3>
-
-                <div
-                    class="overflow-x-auto rounded-xl border border-white/5 bg-gray-950/40 backdrop-blur-sm">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-900/80 border-b border-white/20">
-                            <tr class="text-left text-white">
-                                <th class="px-4 py-3 font-semibold">Producto</th>
-                                <th class="px-4 py-3 font-semibold text-center">Cantidad</th>
-                                <th class="px-4 py-3 font-semibold text-right">Precio</th>
-                                <th class="px-4 py-3 font-semibold text-right">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/10 text-white">
-                            {% for detalle in pedido.detalles.all %}
-                            <tr>
-                                <td class="px-4 py-3">
-                                    {{ detalle.nombre_producto }}
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    {{ detalle.cantidad }}
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    ${{ detalle.precio_unitario }}
-                                </td>
-                                <td class="px-4 py-3 text-right">
-                                    ${{ detalle.subtotal }}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot class="bg-gray-900/80 border-t border-white/20 divide-y divide-white">
-                            
-                            <tr>
-                                <td colspan="3" class="px-4 py-3 text-right font-semibold text-white">
-                                    Descuentos
-                                </td>
-                                <td class="px-4 py-3 text-right font-bold text-white">
-                                    ${{ carrito.descuento }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" class="px-4 py-3 text-right font-semibold text-white">
-                                    DELIVERY
-                                </td>
-                                <td class="px-4 py-3 text-right font-bold text-white">
-                                    ${{ pedido.delivery }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" class="px-4 py-3 text-right font-semibold text-white">
-                                    TOTAL
-                                </td>
-                                <td class="px-4 py-3 text-right font-bold text-white">
-                                    ${{ pedido.total }}
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
                 </div>
             </div>
 
@@ -150,7 +87,7 @@
 
                 <p class="text-xs text-white text-center sm:text-right">
                     Si tienes algún problema con tu pedido, contáctanos al
-                    <span class="font-bold">+569 XXXX XXXX</span>.
+                    <span class="font-bold">+569 8290 5859</span>.
                 </p>
             </div>
         </div>

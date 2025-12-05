@@ -1,55 +1,60 @@
 <header class="top-0 z-30 bg-black">
-    <div class="flex h-20 w-full max-w-7xl mx-auto items-center px-10">
+    <div class="flex h-20 w-full max-w-7xl mx-auto items-center justify-between px-4 sm:px-6 lg:px-10">
 
-        <!-- LEFT: Logo + menú -->
-        <div class="flex items-center gap-5 flex-shrink-0">
+        <!-- LEFT: Logo -->
+        <div class="flex items-center gap-3 sm:gap-5 flex-shrink-0">
             <a href="{% url 'productos:home' %}">
                 <img src="https://pedidosya.dhmedia.io/image/pedidosya/restaurants/san-martin.png?quality=70&width=100"
                     alt="San Martin Foodtruck"
-                    class="w-16 h-16 rounded-full">
+                    class="w-12 h-12 sm:w-16 sm:h-16 rounded-full">
             </a>
 
-            <nav class="flex items-center gap-2 text-white uppercase text-sm tracking-wide">
-                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-productos">Haz tu pedido</a>
-                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-productos">Menú</a>
-                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-footer">Ubicación</a>
-                <a class="hover:text-yellow-400 py-4 px-6" href="#seccion-footer">Contacto</a>
+            <!-- Menú desktop (oculto en móvil) -->
+            <nav class="hidden lg:flex items-center gap-2 text-white uppercase text-sm tracking-wide">
+                <a class="hover:text-yellow-400 py-4 px-4 xl:px-6" href="#seccion-productos">Haz tu pedido</a>
+                <a class="hover:text-yellow-400 py-4 px-4 xl:px-6" href="#seccion-productos">Menú</a>
+                <a class="hover:text-yellow-400 py-4 px-4 xl:px-6" href="#seccion-footer">Ubicación</a>
+                <a class="hover:text-yellow-400 py-4 px-4 xl:px-6" href="#seccion-footer">Contacto</a>
             </nav>
         </div>
 
-        <!-- PUSH RIGHT -->
-        <div class="flex-1"></div>
-
         <!-- RIGHT -->
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2 sm:gap-4 lg:gap-6">
 
             {% if request.user.is_authenticated and request.user.is_superuser %}
-            <a href="{% url 'ordenes:administrar' %}" class="h-10 px-4 flex items-center justify-center rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">
+            <a href="{% url 'ordenes:administrar' %}" 
+               class="h-9 sm:h-10 px-3 sm:px-4 flex items-center justify-center rounded-full bg-yellow-500 text-black text-xs sm:text-sm font-semibold hover:bg-yellow-400 transition">
                 Administrar
             </a>
             {% endif %}
 
             {% if request.user.is_authenticated %}
-            <div class="text-right text-sm leading-tight">
+            <div class="hidden sm:block text-right text-sm leading-tight">
                 <p class="text-yellow-500">
                     Hola {{ request.user.first_name|default:request.user.username }}
                 </p>
                 <a href="{% url 'usuarios:logout' %}"
-                class="font-bold text-yellow-500 hover:text-yellow-400">
+                   class="font-bold text-yellow-500 hover:text-yellow-400">
                     Log out
                 </a>
             </div>
+            <!-- Versión móvil: solo logout -->
+            <a href="{% url 'usuarios:logout' %}"
+               class="sm:hidden h-9 px-3 flex items-center justify-center rounded-full bg-yellow-500 text-black text-xs font-semibold hover:bg-yellow-400 transition">
+                Salir de sesion
+            </a>
             {% else %}
             <a href="{% url 'usuarios:login' %}"
-            class="h-10 px-4 flex items-center justify-center rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">
-                Iniciar sesión
+               class="h-9 sm:h-10 px-3 sm:px-4 flex items-center justify-center rounded-full bg-yellow-500 text-black text-xs sm:text-sm font-semibold hover:bg-yellow-400 transition">
+                <span class="hidden sm:inline">Iniciar sesión</span>
+                <span class="sm:hidden">Login</span>
             </a>
             {% endif %}
 
             <!-- CARRITO -->
             <button id="carrito-btn"
-                class="relative flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500 text-black hover:bg-yellow-400 transition ml-4">
-                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                class="relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-yellow-500 text-black hover:bg-yellow-400 transition">
+                <span class="material-symbols-outlined text-lg sm:text-xl">shopping_cart</span>
                 <span id="carrito-count"
                     class="hidden absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
                     0
